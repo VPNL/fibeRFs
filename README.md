@@ -1,4 +1,4 @@
-### Differential visual field coverage of ventral and lateral face-selective regions is scaffolded by structural connectivity
+### Differential spatial processing in ventral and lateral face-selective regions is scaffolded by structural connections
 **Dawn Finzi, Jesse Gomez, Marisa Nordt, Alex A. Rezai, Sonia Poltoratski, Kalanit Grill-Spector**
 
 This repository contains code to analyze the data, compute statistics, and make the individual figure elements. 
