@@ -1,4 +1,4 @@
-% Code for generating figure 4A
+% Code for generating figure 4A in Finzi et al 2020
 %
 % This script will loop through subject retinotopy data and
 % will then plot averaged coverage maps
@@ -16,10 +16,9 @@ hems = {'rh' 'lh'};
 % get our list of subjects from the Set function:
 s1_setAllSessions
 
-% where do the subjects live
+% change exptDir and figDir to match the paths on your computer
 expt = '/projects/fibeRFs/'; 
 exptDir = fullfile(RAID,expt);
-
 sessionDir = [exptDir 'data/study1/pRFs'];
 savePath = [exptDir 'results/study1/pRFs'];
 figDir = [exptDir 'results/study1/figs/manuscript'];

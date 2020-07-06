@@ -1,4 +1,4 @@
-% Code for generating figure 2A
+% Code for generating figure 2A in Finzi et al 2020
 %
 % Plots the pRF centers for voxels across all subjects
 % (also stores the average centers for subsequent use)
@@ -17,7 +17,7 @@ s1_setAllSessions
 
 hems = {'rh' 'lh'};
 
-% where do the subjects live
+% change exptDir and figDir to match the paths on your computer
 expt = '/projects/fibeRFs/';
 exptDir = fullfile(RAID,expt);
 

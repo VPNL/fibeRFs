@@ -1,4 +1,4 @@
-% Code for generating figure 4B
+% Code for generating figure 4B in Finzi et al 2020
 %
 % This script calculates the proportion of VFC by radial distance from the
 % fovea for each ROI of interest and plots
@@ -17,7 +17,7 @@ hems = {'rh' 'lh'};
 s1_setAllSessions
 total_N = length(sessions);
 
-% where do the subjects live
+% change exptDir and figDir to match the paths on your computer
 expt = '/projects/fibeRFs/'; 
 exptDir = fullfile(RAID,expt);
 
