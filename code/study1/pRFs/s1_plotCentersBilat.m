@@ -28,6 +28,9 @@ figDir = [exptDir 'results/study1/figs/manuscript'];
 % params
 ve_cutoff = .10;
 fieldRange = 40;
+
+% for the main figure we set fieldRange2plot to 30 (degrees) for the supplement we set it
+% to 10 (degrees)
 fieldRange2plot = 10;
 norm = 0;
 
