@@ -29,6 +29,6 @@ PairedData
 
 The matlab analysis code in `code/` was run using Matlab2015a, and relies heavily on functions from [mrVista](http://github.com/vistalab) and the [toonotopy processing code](https://github.com/VPNL/toonotopy). It has been tested on Mac and Linux OS only and may require changing paths to reflect your local environment. The repository should be fast to download and all scripts should run in less than a minute, unless otherwise specified within the script. 
 
-Other than the specified figure generation code, some of the matlab code may not run on your local machine unless you modify your paths to match the implemented directory strcutures as some of the functions use absolute paths to niftis and FreeSurfer surfaces. 
+Other than the specified figure generation code, some of the matlab code may not run on your local machine as some of the functions use absolute paths to niftis and FreeSurfer surfaces which are not currently included. 
 
 Please see the data availability statement in Finzi et. al., 2020 for more and contact me with any questions at: <dfinzi@stanford.edu>
