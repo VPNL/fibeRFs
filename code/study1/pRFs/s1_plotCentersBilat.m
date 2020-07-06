@@ -3,7 +3,7 @@
 % Plots the pRF centers for voxels across all subjects
 % (also stores the average centers for subsequent use)
 % 
-% This script may take awhile (~5 min) to run
+% This script may take awhile (up to ~30 min on a laptop) to run
 %
 % Updated 06/2020 by DF
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
