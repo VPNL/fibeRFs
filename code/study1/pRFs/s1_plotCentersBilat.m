@@ -1,7 +1,11 @@
+% Code for generating figure 2A
+%
 % Plots the pRF centers for voxels across all subjects
 % (also stores the average centers for subsequent use)
+% 
+% This script may take awhile (~5 min) to run
 %
-% Updated 10/2019 by DF
+% Updated 06/2020 by DF
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -15,7 +19,6 @@ hems = {'rh' 'lh'};
 
 % where do the subjects live
 expt = '/projects/fibeRFs/';
-%exptDir = '/Volumes/kgs/projects/fibeRFs/'; 
 exptDir = fullfile(RAID,expt);
 
 sessionDir = [exptDir 'data/study1/toon'];

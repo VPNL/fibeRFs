@@ -1,4 +1,4 @@
-% s1_plotAveragedCoverage.m
+% Code for generating figure 4A
 %
 % This script will loop through subject retinotopy data and
 % will then plot averaged coverage maps

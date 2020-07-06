@@ -1,4 +1,4 @@
-% s1_covByRadialDist_contraOnly.m
+% Code for generating figure 4B
 %
 % This script calculates the proportion of VFC by radial distance from the
 % fovea for each ROI of interest and plots
