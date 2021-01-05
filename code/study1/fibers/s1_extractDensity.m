@@ -7,6 +7,10 @@ function s1_extractDensity(control)
 % Updated 11/2019 by DF
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+if notDefined('control')
+    control = 0;
+end
+
 % get our list of subjects from the Set function:
 s1_setAllSessions
 
@@ -19,10 +23,12 @@ exptDir = fullfile(RAID,expt);
 retDir = [exptDir 'data/study1/toon'];
 dtiDir = [exptDir 'data/study1/diffusion'];
 fsDir = fullfile(RAID, '3Danat/FreesurferSegmentations'); 
-if control == 1
-    resultsDir = [exptDir 'results/study1/fibers/control'];
-else
+if control == 0
     resultsDir = [exptDir 'results/study1/fibers'];
+elseif control == 1
+    resultsDir = [exptDir 'results/study1/fibers/control'];
+elseif control == 2
+    resultsDir = [exptDir 'results/study1/fibers/control/10mm'];
 end
 
 
@@ -46,6 +52,15 @@ for h = 1:length(hems)
             maps = horzcat(maps,{[ROIPre hems{h} '_' faceROIs{r} '_5mm_projed_gmwmi']});
         end
         ROIs = horzcat(maps,{['fibeRFs_f_' hems{h} '_' placeROIs{1} '_5mm_projed_gmwmi']}); %add CoS places
+    elseif control == 2
+        for r = 1:length(faceROIs) %face ROIs
+            if r == 5 %mSTS
+                maps = horzcat(maps,{[ROIPre hems{h} '_' faceROIs{r} '_10mm_projed_gmwmi']});
+            else
+                maps = horzcat(maps,{['fibeRFs_f_' hems{h} '_' faceROIs{r} '_projed_gmwmi']});
+            end
+        end
+        ROIs = horzcat(maps,{['fibeRFs_f_' hems{h} '_' placeROIs{1} '_projed_gmwmi']}); %add CoS places
     else
         for r = 1:length(faceROIs) %face ROIs
             maps = horzcat(maps,{['fibeRFs_f_' hems{h} '_' faceROIs{r} '_projed_gmwmi']});
@@ -69,6 +84,7 @@ for h = 1:length(hems)
     
     %% Loop subjects
     for s = 1:length(fs_sessions);
+
         dir = fullfile(fsDir, fs_sessions(s)); %subj fs dir
 
         EVC_file = fullfile(dir, 'label', EVC);

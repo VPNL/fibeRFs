@@ -3,21 +3,20 @@
 # 3rd col is band #
 # ROI indices are: 1 = V1, 2 = IOG, 3 = pFus, 4 = mFus, 5 = pSTS, 6 = mSTS, 7 = CoS
 
-
 rm(list=ls())
-library(ggthemes)
 library(R.matlab)
 library(tidyverse)
 library(plyr)
 library(lmerTest)
+library(lsmeans)
 
 sem <- function(x) {sd(x, na.rm=TRUE) / sqrt(sum(!is.na((x))))}
 
-#set results path
+# Load data ---------------------------------------------------------------
 path <- "../results/study1/pRFs/"
 
 files <- dir(paste0(path), 
-             pattern = "*eccenBandsControl_40_ve10.mat")
+             pattern = "*eccenBandsControl_40_ve20_10mmcontrol.mat")
 
 for (f in files) {
   mf <- paste0(path,f)
@@ -31,9 +30,11 @@ for (f in files) {
   }
 }
 
-subject <- c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21)
+subject <- c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28)
 
-### Right hemisphere
+
+# Organize right hemisphere -----------------------------------------------
+
 hemi <- rep(c("right"), times = dim(rh_eccen)[2])
 # this is ugly but ¯\_(ツ)_/¯
 stream <- rep(c("aventral"), times = dim(rh_eccen)[2])
@@ -75,7 +76,10 @@ rh_eccen_org$alpha <- as.factor(ifelse(rh_eccen_org$bands ==1, 1,
                                        ifelse(rh_eccen_org$bands ==2,0.75,
                                               ifelse(rh_eccen_org$bands ==3,0.5,0.25))))
 
-## Key plotting
+
+
+# Plot right hemisphere ---------------------------------------------------
+
 b <- ggplot(rh_eccen_org, aes(x=ROI, y=proportion,col=bands,fill=ROI,alpha=factor(alpha))) +
   scale_x_discrete(limits = positions) +
   scale_y_continuous(limits = c(0,1)) +
@@ -87,14 +91,14 @@ b <- ggplot(rh_eccen_org, aes(x=ROI, y=proportion,col=bands,fill=ROI,alpha=facto
        y = "Proportion", x = "ROI") +
   theme(plot.title = element_text(hjust = 0.5)) +
   scale_alpha_manual(values = c("0.25"=0.25, "0.5"=0.5, "0.75"=0.75, "1"=1), guide='none')+
-  scale_fill_manual(values=c("#009900","#d73027", "#fdae61",  "#4575b4", "#f46d43",  "#74add1"), guide = 'none')+
+  scale_fill_manual(values=c("#d73027", "#f46d43", "#fdae61",  "#74add1", "#4575b4",  "#009900"), guide = 'none')+
   scale_colour_manual(values=c("#000000", "#000000", "#000000", "#000000", "#000000", "#000000"), guide = 'none') 
 b
+ggsave("figs/2b_rh_40_ve20_10mmcontrol.pdf", b, width=5, height=5)
 
-ggsave("figs/2b_rh_40_ve10.pdf", b, width=5, height=5)
+# Stats for right hemisphere ----------------------------------------------
 
-## Stats
-# Some summary stats 
+#Some summary stats 
 stable <- ddply(rh_eccen_org, c("ROI", "bands"), summarise,
                 N    = length(proportion),
                 mean = mean(proportion, na.rm=TRUE),
@@ -102,28 +106,26 @@ stable <- ddply(rh_eccen_org, c("ROI", "bands"), summarise,
 )
 stable
 
-# for stats
+#Organize for lme anova
 rh_face <- bind_rows(IOG_gather, pFus_gather, mFus_gather, pSTS_gather,mSTS_gather)
 levels(rh_face$ROI) <- c("IOG", "pFus", "mFus", "pSTS", "mSTS")
 rh_face$ROI <- factor(rh_face$ROI)
 rh_face$stream <- factor(rh_face$stream)
-#rh_face$bands <- as.numeric(rh_face$bands)
 mod.lme <- lmer(proportion ~ stream*bands + (1|subject), data = rh_face)
 summary(mod.lme)
 anova(mod.lme,type=c("III")) 
-library(lsmeans)
+#Post-hoc comparisons
 mod.lsm <- lsmeans::lsmeans(mod.lme, ~ stream*bands)
 mod.lsm
 contrast(mod.lsm,method="tukey",by="bands")
 
-# for hemi comp
+#Organize data for later ventral ROI x hemi comparison
 rh_comp <- bind_rows(IOG_gather, pFus_gather, mFus_gather)
 levels(rh_comp$ROI) <- c("IOG", "pFus", "mFus")
 rh_comp$ROI <- factor(rh_comp$ROI)
 rh_comp$stream <- factor(rh_comp$stream)
-#rh_comp$bands <- as.numeric(rh_comp$bands)
 
-### Left hemisphere
+# Organize left hemisphere -----------------------------------------------
 stream <- rep(c("aventral"), times = dim(lh_eccen)[2])
 hemi <- rep(c("left"), times = dim(lh_eccen)[2])
 ROI <- rep(c("IOG"), times = dim(lh_eccen)[2])
@@ -148,9 +150,9 @@ ROI <- rep(c("mSTS"), times = dim(lh_eccen)[2])
 mSTS <- data.frame(subject,hemi,stream,ROI,lh_eccen[6, , ])
 colnames(mSTS) <- c("subject","hemi","stream","ROI",1,2,3,4)
 mSTS_gather <- gather(mSTS,"bands","proportion", 5:8)
-ROI <- rep(c("CoS"), times = dim(lh_eccen)[2])
 
 stream <- rep(c("aventral"), times = dim(lh_eccen)[2])
+ROI <- rep(c("CoS"), times = dim(lh_eccen)[2])
 CoS <- data.frame(subject,hemi,stream,ROI,lh_eccen[7, , ])
 colnames(CoS) <- c("subject","hemi","stream","ROI",1,2,3,4)
 CoS_gather <- gather(CoS,"bands","proportion", 5:8)
@@ -164,7 +166,11 @@ lh_eccen_org$alpha <- as.factor(ifelse(lh_eccen_org$bands ==1, 1,
                                        ifelse(lh_eccen_org$bands ==2,0.75,
                                               ifelse(lh_eccen_org$bands ==3,0.5,0.25))))
 
-## Key plotting
+
+
+
+# Plot left hemisphere ----------------------------------------------------
+
 b <- ggplot(lh_eccen_org, aes(x=ROI, y=proportion,col=bands,fill=ROI,alpha=factor(alpha))) +
   scale_x_discrete(limits = positions) +
   scale_y_continuous(limits = c(0,1)) +
@@ -176,14 +182,17 @@ b <- ggplot(lh_eccen_org, aes(x=ROI, y=proportion,col=bands,fill=ROI,alpha=facto
        y = "Proportion", x = "ROI") +
   theme(plot.title = element_text(hjust = 0.5)) +
   scale_alpha_manual(values = c("0.25"=0.25, "0.5"=0.5, "0.75"=0.75, "1"=1), guide='none')+
-  scale_fill_manual(values=c("#009900","#d73027", "#fdae61",  "#4575b4", "#f46d43",  "#74add1"), guide = 'none')+
+  #scale_fill_manual(values=c("#009900","#d73027", "#fdae61",  "#4575b4", "#f46d43",  "#74add1"), guide = 'none')+
+  scale_fill_manual(values=c("#d73027", "#f46d43", "#fdae61",  "#74add1", "#4575b4",  "#009900"), guide = 'none')+
   scale_colour_manual(values=c("#000000", "#000000", "#000000", "#000000", "#000000", "#000000"), guide = 'none') 
 b
+ggsave("figs/2b_lh_40_ve20_10mmcontrol.pdf", b, width=5, height=5)
 
-ggsave("figs/2b_lh_40_ve10.pdf", b, width=5, height=5)
 
-## Stats
-# Some summary stats 
+
+# Stats for left hemisphere -----------------------------------------------
+
+#Some summary stats 
 stable <- ddply(lh_eccen_org, c("ROI", "bands"), summarise,
                 N    = length(proportion),
                 mean = mean(proportion, na.rm=TRUE),
@@ -191,28 +200,29 @@ stable <- ddply(lh_eccen_org, c("ROI", "bands"), summarise,
 )
 stable
 
-# for stats
-lh_face <- bind_rows(IOG_gather, pFus_gather, mFus_gather, pSTS_gather)
-levels(lh_face$ROI) <- c("IOG", "pFus", "mFus", "pSTS")
+#Organize for lme anova
+lh_face <- bind_rows(IOG_gather, pFus_gather, mFus_gather, pSTS_gather, mSTS_gather)
+levels(lh_face$ROI) <- c("IOG", "pFus", "mFus", "pSTS", "mSTS")
 lh_face$ROI <- factor(lh_face$ROI)
 lh_face$stream <- factor(lh_face$stream)
-#lh_face$bands <- as.numeric(lh_face$bands)
 mod.lme <- lmer(proportion ~ stream*bands + (1|subject), data = lh_face)
 summary(mod.lme)
 anova(mod.lme,type=c("III")) 
+#Post-hoc comparisons
 mod.lsm <- lsmeans::lsmeans(mod.lme, ~ stream*bands)
 mod.lsm
 contrast(mod.lsm,method="tukey",by="bands")
 
-
-# for hemi comp
+#Organize data for ventral ROI x hemi comparison
 lh_comp <- bind_rows(IOG_gather, pFus_gather, mFus_gather)
 levels(lh_comp$ROI) <- c("IOG", "pFus", "mFus")
 lh_comp$ROI <- factor(lh_comp$ROI)
 lh_comp$stream <- factor(lh_comp$stream)
-#rh_comp$bands <- as.numeric(rh_comp$bands)
 
-# Both hemis, face ROIs only, no left mSTS
+
+
+# Comparing ventral ROIs across hemis -------------------------------------
+
 full <- full_join(rh_comp, lh_comp)
 full$hemi <- factor(full$hemi)
 full$stream <- factor(full$stream)

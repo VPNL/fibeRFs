@@ -37,7 +37,7 @@ newPre = 'fiberRFsclean_f_';     % preFix to add to the ROI name - usually expt_
 
 %%%%% comment field information - session & anat will be auto-filled
 comment.name = 'Dawn Finzi';
-comment.note = 'Oct 2019';
+comment.note = 'Oct 2020';
 outStr = []; % aggregate output information, display at end (since mrV output will disrupt readability)
 
 %%%%% output info

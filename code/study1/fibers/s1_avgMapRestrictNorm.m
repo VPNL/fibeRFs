@@ -31,7 +31,11 @@ for h = 1:length(hems)
     
     ROIs={};
     for r = 1:length(faceROIs) %face ROIs
-        ROIs = horzcat(ROIs,{[ROIPre hems{h} '_' faceROIs{r} '_projed_gmwmi_r1.00_WholeBrainFG_track_' hems{h} '_proj_max_concat']});
+        if r == 5
+            ROIs = horzcat(ROIs,{['fibeRFsclean_f_' hems{h} '_' faceROIs{r} '_10mm_projed_gmwmi_r1.00_WholeBrainFG_track_' hems{h} '_proj_max_concat']});
+        else
+            ROIs = horzcat(ROIs,{[ROIPre hems{h} '_' faceROIs{r} '_projed_gmwmi_r1.00_WholeBrainFG_track_' hems{h} '_proj_max_concat']});
+        end
     end
     ROIs = horzcat(ROIs,{[ROIPre hems{h} '_' placeROIs{1} '_projed_gmwmi_r1.00_WholeBrainFG_track_' hems{h} '_proj_max_concat']}); %add CoS places
     EVC = {[hems{h} '.benson_EVC.label']};
@@ -41,7 +45,7 @@ for h = 1:length(hems)
     EVC_label = read_label_kgs(EVC_file{1}); 
     EVC_label = sort(EVC_label);
     %use the vertices from the label (first column) to select only EVC vals
-    idx = EVC_label(1:end,1);
+    idx = EVC_label(2:end,1);
 
     for ROI = 1:length(ROIs)
 

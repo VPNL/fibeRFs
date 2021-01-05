@@ -13,17 +13,19 @@ hems = {'rh', 'lh'};
 
 % where do the subjects live
 expt = '/projects/fibeRFs/'; 
-exptDir = fullfile(RAID,expt);
+%exptDir = fullfile(RAID,expt);
+exptDir = '/Volumes/kgs/projects/fibeRFs/';
 
 sessionDir = [exptDir 'data/study1/toon'];
 dataDir = [exptDir 'results/study1/pRFs'];
 figDir = [exptDir 'results/study1/figs/manuscript'];
 
-ve_cutoff = .10; 
+ve_cutoff = .20; %.10; 
 fieldRange = 40;
+thresh = 10;
 
-xmax = 20;
-ymax = 20;
+xmax = 40;
+ymax = 40;
 
 %% Set up ROIs
 ROIs_txt = {'V1' 'V2' 'V3' 'IOG faces' 'pFus faces' 'mFus faces' 'pSTS faces ' 'mSTS faces' 'CoS places'};
@@ -40,8 +42,8 @@ size_form = 2;
 % 3 = what kendrick uses (2*sigma/sqrt(exp))
 
 %% Load prf sets
-prfset(1) = load(fullfile(dataDir, ['rh_pRFset_' num2str(fieldRange)  '_ve' num2str(ve_cutoff*100) '.mat'])); 
-prfset(2) = load(fullfile(dataDir, ['lh_pRFset_' num2str(fieldRange)  '_ve' num2str(ve_cutoff*100) '.mat'])); 
+prfset(1) = load(fullfile(dataDir, ['rh_pRFset_' num2str(fieldRange)  '_ve' num2str(ve_cutoff*100) '_voxthresh' num2str(thresh) '.mat'])); 
+prfset(2) = load(fullfile(dataDir, ['lh_pRFset_' num2str(fieldRange)  '_ve' num2str(ve_cutoff*100) '_voxthresh' num2str(thresh) '.mat'])); 
 
 %initialize
 for h = 1:length(hems)
@@ -137,6 +139,6 @@ for h = 1:length(hems)
             txt = ['sizeEccen_r'  num2str(ve_cutoff*100) '_kkSize_' hems{h}];
         end
         figure(f(1));
-        niceSave(figDir,['/scatter_square_2020_' txt],[],[],{'png' 'svg'});
+        niceSave(figDir,['/scatter_square_4040_' txt],[],[],{'png' 'svg'});
     end
 end

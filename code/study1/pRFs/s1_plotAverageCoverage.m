@@ -1,4 +1,4 @@
-% Code for generating figure 4A in Finzi et al 2020
+% s1_plotAveragedCoverage.m
 %
 % This script will loop through subject retinotopy data and
 % will then plot averaged coverage maps
@@ -16,18 +16,19 @@ hems = {'rh' 'lh'};
 % get our list of subjects from the Set function:
 s1_setAllSessions
 
-% change exptDir and figDir to match the paths on your computer
+% where do the subjects live
 expt = '/projects/fibeRFs/'; 
 exptDir = fullfile(RAID,expt);
+
 sessionDir = [exptDir 'data/study1/pRFs'];
 savePath = [exptDir 'results/study1/pRFs'];
 figDir = [exptDir 'results/study1/figs/manuscript'];
 
 % params
-ve_cutoff = .10;
-fieldRange = 30;
-%fieldRange2Plot = 30;
+ve_cutoff = .20;
+fieldRange = 20; %30
 norm = 0;
+thresh=10;
 
 %% Set up ROIs
 allROIs = standardROIs;
@@ -40,15 +41,15 @@ IOG = 4; pFus = 5; mFus = 6; pSTS = 7; mSTS = 8; CoS = 9;
 for h = 1:length(hems)
 
     %% Let's load previously saved coverage
-    dataFile = fullfile(savePath, [hems{h} '_coverage_data_ve' num2str(ve_cutoff*100) '_' num2str(fieldRange)]);
+    dataFile = fullfile(savePath, [hems{h} '_coverage_data_ve' num2str(ve_cutoff*100) '_' num2str(fieldRange) '_voxthresh' num2str(thresh) '_10mmcontrol']);
     load(dataFile);
     
-    avg_centers = fullfile(savePath, ['average_prf_centers_' num2str(fieldRange) '_ve' num2str(ve_cutoff*100)]);
+    avg_centers = fullfile(savePath, ['average_prf_centers_' num2str(fieldRange) '_ve' num2str(ve_cutoff*100) '_10mmcontrol']);
     load(avg_centers)
     %% Now plot
     
     % make internally consistent
-    for i = 1:21
+    for i = 1:length(sessions)
         for r = IOG:CoS
             if isnan(fits(r).coverage(1,1,i))
                 fits(r).includedvox(:, i) = NaN;
@@ -72,8 +73,8 @@ for h = 1:length(hems)
     
     set(gcf, 'PaperPositionMode', 'auto');
     brighten(gcf,-0.2)
-    saveFigFile = fullfile(figDir, [hems{h} '_f_averageCoverage_ve' num2str(ve_cutoff*100) '_' num2str(fieldRange) '.fig']); 
-    print('-r300', '-dpng', fullfile(figDir, [hems{h} '_f_averageCoverage_ve' num2str(ve_cutoff*100) '_' num2str(fieldRange)]));
+    saveFigFile = fullfile(figDir, [hems{h} '_f_averageCoverage_ve' num2str(ve_cutoff*100) '_' num2str(fieldRange) '_voxthresh' num2str(thresh) '_10mmcontrol.fig']); 
+    print('-r300', '-dpng', fullfile(figDir, [hems{h} '_f_averageCoverage_ve' num2str(ve_cutoff*100) '_' num2str(fieldRange) '_voxthresh' num2str(thresh) '_10mmcontrol']));
     saveas(gcf, saveFigFile)
 
 

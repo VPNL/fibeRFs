@@ -25,12 +25,12 @@ sessionDir = [exptDir 'data/study1/toon'];
 savePath = [exptDir 'results/study1/pRFs'];
 
 % params for rmPlotCoverage_flips function
-ve_cutoff = .10;
-fieldRange = 40; 
+ve_cutoff = .20;
+fieldRange = 20; %40; 
 sigThresh = 0.21;
 eThresh = [0, fieldRange];
 norm = 0;
-thresh = 25; %threshold for number of voxels needed to include
+thresh = 10; %threshold for number of voxels needed to include
 
 %% Set up ROIs
 EVCROIs = standardROIs('EVC');
@@ -80,7 +80,8 @@ for h = 1:length(hems)
                 
                 fits(m).includedvox(:, i) = sum(coIndices);
                 
-                %only included coverage data for ROIs with 10 vox or more
+                %only included coverage data for ROIs with more voxels than
+                %set threshold
                 if fits(m).includedvox(:, i) >= thresh
                     fits(m).coverage(:, :, i) = pRF_COV;
                 else 
@@ -104,6 +105,6 @@ for h = 1:length(hems)
     end
 
     %Save the coverage info 
-    saveFile = fullfile(savePath, [hems{h} '_coverage_data_ve', num2str(ve_cutoff*100) '_' num2str(fieldRange)]);
+    saveFile = fullfile(savePath, [hems{h} '_coverage_data_ve', num2str(ve_cutoff*100) '_' num2str(fieldRange) '_voxthresh' num2str(thresh) '_10mmcontrol']);
     save(saveFile, 'fits');
 end

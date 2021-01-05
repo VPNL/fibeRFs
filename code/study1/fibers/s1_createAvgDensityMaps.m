@@ -28,10 +28,12 @@ ROIPre = 'fibeRFs_f_';
 for h = 1:length(hems)
 
     ROIs={};
-    for r = 1:length(faceROIs) %face ROIs
-        ROIs = horzcat(ROIs,{[ROIPre hems{h} '_' faceROIs{r} '_projed_gmwmi_r1.00_WholeBrainFG_track_' hems{h} '_proj_max']});
-    end
-    ROIs = horzcat(ROIs,{[ROIPre hems{h} '_' placeROIs{1} '_projed_gmwmi_r1.00_WholeBrainFG_track_' hems{h} '_proj_max']}); %add CoS places
+    r=5;
+    ROIs = horzcat(ROIs,{['fibeRFsclean_f_' hems{h} '_' faceROIs{r} '_10mm_projed_gmwmi_r1.00_WholeBrainFG_track_' hems{h} '_proj_max']});
+%     for r = 1:length(faceROIs) %face ROIs
+%         ROIs = horzcat(ROIs,{[ROIPre hems{h} '_' faceROIs{r} '_projed_gmwmi_r1.00_WholeBrainFG_track_' hems{h} '_proj_max']});
+%     end
+%     ROIs = horzcat(ROIs,{[ROIPre hems{h} '_' placeROIs{1} '_projed_gmwmi_r1.00_WholeBrainFG_track_' hems{h} '_proj_max']}); %add CoS places
 
     for ss = 1:length(fs_sessions)
         
@@ -62,11 +64,13 @@ cd(fullfile(fsDir, 'fsaverage-bkup', 'surf'));
 for h = 1:length(hems)
     
     ROIs={};
-    for r = 1:length(faceROIs) %face ROIs
-        ROIs = horzcat(ROIs,{[ROIPre hems{h} '_' faceROIs{r} '_projed_gmwmi_r1.00_WholeBrainFG_track_' hems{h} '_proj_max']});
-    end
-    ROIs = horzcat(ROIs,{[ROIPre hems{h} '_' placeROIs{1} '_projed_gmwmi_r1.00_WholeBrainFG_track_' hems{h} '_proj_max']}); %add CoS places
-    
+%     for r = 1:length(faceROIs) %face ROIs
+%         ROIs = horzcat(ROIs,{[ROIPre hems{h} '_' faceROIs{r} '_projed_gmwmi_r1.00_WholeBrainFG_track_' hems{h} '_proj_max']});
+%     end
+%     ROIs = horzcat(ROIs,{[ROIPre hems{h} '_' placeROIs{1} '_projed_gmwmi_r1.00_WholeBrainFG_track_' hems{h} '_proj_max']}); %add CoS places
+r=5;    
+ROIs = horzcat(ROIs,{['fibeRFsclean_f_' hems{h} '_' faceROIs{r} '_10mm_projed_gmwmi_r1.00_WholeBrainFG_track_' hems{h} '_proj_max']});
+
     for mm = 1:length(ROIs)
         
         map_name = ROIs{mm};

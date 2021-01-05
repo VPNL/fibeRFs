@@ -7,6 +7,10 @@ function s1_transformTracks2Surface(control)
 % Updated 11/2019 by DF
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+if notDefined('control')
+    control = 0;
+end
+
 % get our list of subjects from the Set function:
 s1_setAllSessions
 
@@ -41,6 +45,8 @@ for h = 1:length(hems)
             maps = horzcat(maps,{[ROIPre hems{h} '_' faceROIs{r} '_5mm_projed_gmwmi.mat']});
         end
         ROIs = horzcat(maps,{['fibeRFs_f_' hems{h} '_' placeROIs{1} '_5mm_projed_gmwmi.mat']}); %add CoS places
+    elseif control == 2
+        ROIs = {[ROIPre hems{h} '_mSTS_faces_10mm_projed_gmwmi.mat']}; 
     else
         for r = 1:length(faceROIs) %face ROIs
             maps = horzcat(maps,{['fibeRFs_f_' hems{h} '_' faceROIs{r} '_projed_gmwmi.mat']});

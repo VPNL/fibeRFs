@@ -15,7 +15,7 @@ expt = '/projects/fibeRFs/';
 exptDir = fullfile(RAID,expt);
 
 dtiDir = [exptDir 'data/study1/diffusion'];
-outDir = [exptDir 'results/study1'];
+outDir = [exptDir 'results/study1/fibers/10mm'];
 
 %% Set up ROIs
 faceROIs = standardROIs('face');
@@ -35,7 +35,11 @@ for h = 1:length(hems)
     
     ROIs={};
     for roi = 1:length(faceROIs) %face ROIs
-        ROIs = horzcat(ROIs,{[ROIPre hems{h} '_' faceROIs{roi} '_projed_gmwmi']});
+        if roi == 5
+            ROIs = horzcat(ROIs,{['fibeRFsclean_f_' hems{h} '_' faceROIs{roi} '_projed_gmwmi']});
+        else
+            ROIs = horzcat(ROIs,{[ROIPre hems{h} '_' faceROIs{roi} '_projed_gmwmi']});
+        end
     end
     ROIs = horzcat(ROIs,{[ROIPre hems{h} '_' placeROIs{1} '_projed_gmwmi']}); %add CoS places
 

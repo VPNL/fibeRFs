@@ -7,12 +7,17 @@ rm(list=ls())
 library(ggthemes)
 library(R.matlab)
 library(tidyverse)
+library(lmerTest)
+library(lsmeans)
 
-#set results path
+sem <- function(x) {sd(x, na.rm=TRUE) / sqrt(sum(!is.na((x))))}
+
+# Load data ---------------------------------------------------------------
+
 path <- "../results/study1/pRFs/"
 
 files <- dir(paste0(path), 
-             pattern = "*_sigBandsControl_40_ve10.mat")
+             pattern = "*_sigBandsControl_40_ve20_10mmcontrol.mat")
 
 for (f in files) {
   mf <- paste0(path,f)
@@ -26,9 +31,10 @@ for (f in files) {
   }
 }
 
-subject <- c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21)
+subject <- c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28)
 
-### Right hemisphere
+# Organize & plot band 1 -----------------------------------------------
+
 V1 <- rh_sig[1, ,1]
 IOG <- rh_sig[2, ,1]
 pFus <- rh_sig[3, ,1]
@@ -54,22 +60,24 @@ p <- ggplot(rh.tidy_plot, aes(x=ROI, y=mean)) +
   ylim(0,40)+
   scale_fill_manual(values=c("#009900","#d73027", "#fdae61",  "#4575b4", "#f46d43",  "#74add1"))
 p
-ggsave("figs/3b_rh_40_ve10_band1.pdf", p, width=4, height=5)
+ggsave("figs/3b_rh_40_ve20_band1_10mmcontrol.pdf", p, width=4, height=5)
 
-## Stats
-library(lmerTest)
-rh_subs.tidy <- gather(rh_subs, ROI, mean, 2:6) #no CoS
+# Stats band 1 -----------------------------------------------
+rh_subs.tidy <- gather(rh_subs, ROI, mean, 2:6) #no CoS 
+#(Note to self: this data structure looks weird b/c keeps extra CoS col., but I verified)
 rh_subs.tidy$subject <- factor(rh_subs.tidy$subject)
 rh_subs.tidy$ROI <- factor(rh_subs.tidy$ROI)
 mod.lme <- lmer(mean ~ ROI + (1|subject), data = rh_subs.tidy)
 summary(mod.lme)
-anova(mod.lme,type=c("III")) #specify type=c(“III”)to correct for the unbalanced design
-library(lsmeans)
+anova(mod.lme,type=c("III")) 
+
 mod.lsm <- lsmeans::lsmeans(mod.lme, ~ ROI)
 mod.lsm
-pairs(mod.lsm)
+pairs<-contrast(mod.lsm,method="tukey")
+pairs
+pval <- summary(pairs)$p.value #exact sig figs for table
 
-## band 2
+# Organize & plot band 2 -----------------------------------------------
 IOG <- rh_sig[2, ,2]
 pFus <- rh_sig[3, ,2]
 mFus <- rh_sig[4, ,2]
@@ -92,22 +100,24 @@ p <- ggplot(rh.tidy_plot, aes(x=ROI, y=mean)) +
   ylim(0,40)+
   scale_fill_manual(values=c("#009900","#d73027", "#fdae61",  "#4575b4", "#f46d43",  "#74add1"))
 p
-ggsave("figs/3b_rh_40_ve10_band2.pdf", p, width=4, height=5)
+ggsave("figs/3b_rh_40_ve20_band2_10mmcontrol.pdf", p, width=4, height=5)
 
-## Stats
-library(lmerTest)
+# Stats band 2 -----------------------------------------------
 rh_subs.tidy <- gather(rh_subs, ROI, mean, 2:6) #no CoS
 rh_subs.tidy$subject <- factor(rh_subs.tidy$subject)
 rh_subs.tidy$ROI <- factor(rh_subs.tidy$ROI)
 mod.lme <- lmer(mean ~ ROI + (1|subject), data = rh_subs.tidy)
 summary(mod.lme)
-anova(mod.lme,type=c("III")) #specify type=c(“III”)to correct for the unbalanced design
-library(lsmeans)
+anova(mod.lme,type=c("III")) 
+
 mod.lsm <- lsmeans::lsmeans(mod.lme, ~ ROI)
 mod.lsm
-pairs(mod.lsm)
+pairs<-contrast(mod.lsm,method="tukey")
+pairs
+pval <- summary(pairs)$p.value #exact sig figs for table
 
-## band 3
+
+# Organize & plot band 3 -----------------------------------------------
 IOG <- rh_sig[2, ,3]
 pFus <- rh_sig[3, ,3]
 mFus <- rh_sig[4, ,3]
@@ -130,4 +140,4 @@ p <- ggplot(rh.tidy_plot, aes(x=ROI, y=mean)) +
   ylim(0,40)+
   scale_fill_manual(values=c("#009900","#d73027", "#fdae61",  "#4575b4", "#f46d43",  "#74add1"))
 p
-ggsave("figs/3b_rh_40_ve10_band3.pdf", p, width=4, height=5)
+ggsave("figs/3b_rh_40_ve20_band3_10mmcontrol.pdf", p, width=4, height=5)

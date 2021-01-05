@@ -1,13 +1,8 @@
-% Code for generating figure 2A in Finzi et al 2020
-%
 % Plots the pRF centers for voxels across all subjects
 % (also stores the average centers for subsequent use)
-% 
-% This script may take awhile (up to ~30 min on a laptop) to run
 %
-% Updated 06/2020 by DF
+% Updated 10/2019 by DF
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 
 clear all;
 close all
@@ -17,8 +12,9 @@ s1_setAllSessions
 
 hems = {'rh' 'lh'};
 
-% change exptDir and figDir to match the paths on your computer
+% where do the subjects live
 expt = '/projects/fibeRFs/';
+%exptDir = '/Volumes/kgs/projects/fibeRFs/'; 
 exptDir = fullfile(RAID,expt);
 
 sessionDir = [exptDir 'data/study1/toon'];
@@ -26,13 +22,11 @@ dataDir = [exptDir 'results/study1/pRFs'];
 figDir = [exptDir 'results/study1/figs/manuscript'];
 
 % params
-ve_cutoff = .10;
+ve_cutoff = .20;
 fieldRange = 40;
-
-% for the main figure we set fieldRange2plot to 30 (degrees) for the supplement we set it
-% to 10 (degrees)
-fieldRange2plot = 10;
+fieldRange2plot = 30;
 norm = 0;
+thresh = 10; %just to pull in files
 
 %% Set up ROIs
 EVCROIs = standardROIs('EVC');
@@ -48,8 +42,10 @@ IOG = 4; pFus = 5; mFus = 6; pSTS = 7; mSTS = 8; CoS = 9;
 
 %% load prf sets
 
-set(1) = load(fullfile(dataDir, ['rh_pRFset_' num2str(fieldRange)  '_ve' num2str(ve_cutoff*100) '.mat'])); 
-set(2) = load(fullfile(dataDir, ['lh_pRFset_' num2str(fieldRange)  '_ve' num2str(ve_cutoff*100) '.mat'])); 
+set(1) = load(fullfile(dataDir, ['rh_pRFset_' num2str(fieldRange)  '_ve' num2str(ve_cutoff*100) '_voxthresh' num2str(thresh) '_10mmcontrol.mat'])); 
+set(2) = load(fullfile(dataDir, ['lh_pRFset_' num2str(fieldRange)  '_ve' num2str(ve_cutoff*100) '_voxthresh' num2str(thresh) '_10mmcontrol.mat'])); 
+
+[~, xydeg_idx] = ismember('XYdeg', fieldnames(set(1).subj(1).roi(1).fits.vox)); %for reorg
 
 %initialize
 for h = 1:2
@@ -69,7 +65,7 @@ for h = 1:2
                 end
             end
             if ~isempty(vox)
-                temp = struct2cell(vox.').'; XYdeg = temp(:, 4); clear temp;
+                temp = struct2cell(vox.').'; XYdeg = temp(:, xydeg_idx); clear temp;
                 XYdeg(cellfun(@(XYdeg) any(isnan(XYdeg)),XYdeg))=[]; %remove nans
                 vals = cell2mat(XYdeg); 
                 x_val(h,i,r) = nanmean(vals(:,1));
@@ -89,22 +85,22 @@ for h = 1:2
     end
 end
 
-saveMatFile = fullfile(dataDir,['average_prf_centers_' num2str(fieldRange2plot) '_ve' num2str(ve_cutoff*100) '.mat']);
+saveMatFile = fullfile(dataDir,['average_prf_centers_' num2str(fieldRange2plot) '_ve' num2str(ve_cutoff*100) '_10mmcontrol.mat']);
 save(saveMatFile, 'x_val','y_val');
 %% Now plot the centers
 
 
-colors_right = [.7*[255/255, 0/255, 0/255];...
+colors_left = [.7*[255/255, 0/255, 0/255];...
         .7*[255/255, 128/255, 0/255];...
         .7*[255/255, 255/255, 0/255];...
-        .4*[0/255, 128/255, 255/255];...
-        .7*[0/255, 0/255, 255/255];...
+        .6*[0/255, 128/255, 255/255];...
+        .4*[0/255, 0/255, 255/255];...
         .7*[0/255, 255/255, 0/255]];
-colors_left = [[255/255, 0/255, 0/255];...
+colors_right = [[255/255, 0/255, 0/255];...
         [255/255, 128/255, 0/255];...
         [255/255, 255/255, 0/255];...
         [0/255, 128/255, 255/255];...
-        [0/255, 0/255, 255/255];...
+        .9*[0/255, 0/255, 255/255];...
         [0/255, 255/255, 0/255]];
     
 f = figure('Position',[100 100 3000 600],'color','w');
@@ -125,8 +121,16 @@ for r = IOG:CoS
     xlim([-vfc.fieldRange vfc.fieldRange])
     ylim([-vfc.fieldRange vfc.fieldRange])
 
-    for h = 1:2
-        temp = struct2cell(hemi(h).allRoi(r).vox.').'; XYdeg = temp(:, 4); clear temp;
+    for rev_h = 1:2 %let's switch the ordering
+        
+        %lil switcheroo
+        if rev_h == 1
+            h = 2;
+        else
+            h = 1;
+        end
+        
+        temp = struct2cell(hemi(h).allRoi(r).vox.').'; XYdeg = temp(:, xydeg_idx); clear temp;
         XYdeg(cellfun(@(XYdeg) any(isnan(XYdeg)),XYdeg))=[]; %remove nans
         vals = cell2mat(XYdeg); 
 
@@ -136,9 +140,9 @@ for r = IOG:CoS
         elseif h == 2 %left hemi
             color = colors_left(i,:);
         end
-        if ~(r==mSTS&&h==2) %don't plot left mSTS
-            scatter(vals(:,1),vals(:,2),15,color); hold on;
-        end
+        %if ~(r==mSTS&&h==2) %don't plot left mSTS
+        scatter(vals(:,1),vals(:,2),15,color); hold on;
+        %end
         
     end
     
@@ -148,8 +152,8 @@ end
 % Now save the figure
 cd(figDir)
 
-saveFigFile = fullfile(figDir,['all_pRF_centers_' num2str(fieldRange2plot) '_ve' num2str(ve_cutoff*100) '.fig']); 
-print('-r300','-dpng',fullfile(figDir,['all_pRF_centers_' num2str(fieldRange2plot) '_ve' num2str(ve_cutoff*100)])) 
+saveFigFile = fullfile(figDir,['all_pRF_centers_' num2str(fieldRange2plot) '_ve' num2str(ve_cutoff*100) '_10mmcontrol.fig']); 
+print('-r300','-dpng',fullfile(figDir,['all_pRF_centers_' num2str(fieldRange2plot) '_ve' num2str(ve_cutoff*100) '_10mmcontrol'])) 
 
 saveas(gcf,saveFigFile)
 

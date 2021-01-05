@@ -24,9 +24,10 @@ savePath = [exptDir 'results/study1/pRFs'];
 figDir = [exptDir 'results/study1/figs'];
 
 % params
-ve_cutoff = .10;
-fieldRange = 40;
+ve_cutoff = .20;
+fieldRange = 30;
 norm = 0;
+voxthresh = 10;
 
 %corresponding indices - same throughout
 V1 = 1; V2 = 2; V3 = 3; 
@@ -35,7 +36,7 @@ IOG = 4; pFus = 5; mFus = 6; pSTS = 7; mSTS = 8; CoS = 9;
 for h = 1:length(hems)
     
     %% Let's load previously saved coverage
-    dataFile = fullfile(savePath, [hems{h} '_coverage_data_ve', num2str(ve_cutoff*100), '_' num2str(fieldRange)]);
+    dataFile = fullfile(savePath, [hems{h} '_coverage_data_ve', num2str(ve_cutoff*100), '_' num2str(fieldRange) '_voxthresh' num2str(voxthresh) '_10mmcontrol']);
     load(dataFile);
 
     %calculate laterality index from coverage
@@ -83,12 +84,12 @@ legend_type = 'plot';
 barweb(vals', errs', width, groupnames, bw_title, bw_xlabel, bw_ylabel, bw_colormap, gridstatus, bw_legend, error_sides, legend_type)
 
 set(gcf, 'PaperPositionMode', 'auto');
-saveFigFile = fullfile(figDir,['ContraVSIpsi' num2str(ve_cutoff*100) '_' num2str(fieldRange) '.fig']);
-print('-r300','-dpng',fullfile(figDir,['ContraVSIpsi' num2str(ve_cutoff*100) '_' num2str(fieldRange)]))
+saveFigFile = fullfile(figDir,['ContraVSIpsi' num2str(ve_cutoff*100) '_' num2str(fieldRange) '_10mmcontrol.fig']);
+print('-r300','-dpng',fullfile(figDir,['ContraVSIpsi' num2str(ve_cutoff*100) '_' num2str(fieldRange) '_10mmcontrol']))
 saveas(gcf,saveFigFile)
 
 right_lat_index = squeeze(both_lat_index(1,:,:));
 left_lat_index = squeeze(both_lat_index(2,:,:));
 
-saveMatFile = fullfile(savePath,['ContraVSIpsi_' num2str(ve_cutoff*100) '_' num2str(fieldRange) '.mat']);
+saveMatFile = fullfile(savePath,['ContraVSIpsi_' num2str(ve_cutoff*100) '_' num2str(fieldRange) '_10mmcontrol.mat']);
 save(saveMatFile, 'right_lat_index', 'left_lat_index'); 

@@ -31,7 +31,7 @@ fsDir = fullfile(RAID, '3Danat/FreesurferSegmentations');
 
 %% Set up ROIs
 faceROIs = standardROIs('face');
-placeROIs = standardROIs('place');
+%placeROIs = standardROIs('place');
 
 fROIPre = 'fiberRFsclean_f_'; 
 
@@ -43,9 +43,9 @@ for h = 1:length(hems)
     %% Get ROIs
     maps={};
     for r = 1:length(faceROIs) %face ROIs
-        maps = horzcat(maps,{[fROIPre hems{h} '_' faceROIs{r} '_5mm']});
+        maps = horzcat(maps,{[fROIPre hems{h} '_' faceROIs{r} '_10mm']});
     end
-    maps = horzcat(maps,{[fROIPre hems{h} '_' placeROIs{1} '_5mm']}); %add CoS places
+    %maps = horzcat(maps,{[fROIPre hems{h} '_' placeROIs{1} '_5mm']}); %add CoS places
 
 
     for s = 1:length(dMRI_sessions)

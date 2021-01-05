@@ -4,13 +4,12 @@ library(ggthemes)
 library(R.matlab)
 library(tidyverse)
 library(lmerTest)
-library(lsmeans)
 
 #set results path
 path <- "../results/study1/pRFs/"
 
 files <- dir(paste0(path), 
-             pattern = "*ratios_10.mat")
+             pattern = "*ratios.mat")
 
 for (f in files) {
   mf <- paste0(path,f)
@@ -86,7 +85,8 @@ subs.tidy$exper <- factor(subs.tidy$exper)
 subs.tidy$hemi <- factor(subs.tidy$hemi)
 mod.lme <- lmer(mean ~ hemi*exper*ROI + (1|subject), data = subs.tidy)
 summary(mod.lme)
-anova(mod.lme,type=c("III"))
+anova(mod.lme,type=c("III")) 
+library(lsmeans)
 mod.lsm <- lsmeans::lsmeans(mod.lme, ~ ROI*exper)
 mod.lsm
 contrast(mod.lsm,method="tukey",by="ROI")
@@ -98,7 +98,8 @@ rh.tidy$exper <- factor(rh.tidy$exper)
 rh.tidy$hemi <- factor(rh.tidy$hemi)
 mod.lme <- lmer(mean ~ exper*ROI + (1|subject), data = rh.tidy)
 summary(mod.lme)
-anova(mod.lme,type=c("III"))
+anova(mod.lme,type=c("III")) 
+library(lsmeans)
 mod.lsm <- lsmeans::lsmeans(mod.lme, ~ ROI*exper)
 mod.lsm
 contrast(mod.lsm,method="tukey",by="ROI")
@@ -109,7 +110,8 @@ lh.tidy$exper <- factor(lh.tidy$exper)
 lh.tidy$hemi <- factor(lh.tidy$hemi)
 mod.lme <- lmer(mean ~ exper*ROI + (1|subject), data = lh.tidy)
 summary(mod.lme)
-anova(mod.lme,type=c("III"))
+anova(mod.lme,type=c("III")) 
+library(lsmeans)
 mod.lsm <- lsmeans::lsmeans(mod.lme, ~ ROI*exper)
 mod.lsm
 contrast(mod.lsm,method="tukey",by="ROI")

@@ -9,6 +9,10 @@ function s1_fs2wmDTI(control)
 % Updated 11/2019 by DF
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+if notDefined('control')
+    control = 0;
+end
+
 % get our list of subjects from the Set function:
 s1_setAllSessions
 
@@ -41,6 +45,8 @@ for h = 1:length(hems)
             maps = horzcat(maps,{[ROIPre hems{h} '_' faceROIs{r} '_5mm']});
         end
         maps = horzcat(maps,{['fibeRFs_f_' hems{h} '_' placeROIs{1} '_5mm']}); %add CoS places
+    elseif control == 2  %10mm control analysis for mSTS
+        maps = {[ROIPre hems{h} '_mSTS_faces_10mm']};
     else
         maps={};
         maps = horzcat(maps,{['fibeRFs_f_' hems{h} '_EVC']});

@@ -1,16 +1,18 @@
 ## Creates figure 7B (fibers endpoints per eccentricity band)
 
 rm(list=ls())
-library(ggthemes)
 library(R.matlab)
 library(tidyverse)
 library(plyr)
+library(lmerTest)
+library(lsmeans)
+
 
 sem <- function(x) {sd(x, na.rm=TRUE) / sqrt(sum(!is.na((x))))}
 
 
-#set results path
-path <- "../results/study1/fibers/"
+# Load data ---------------------------------------------------------------
+path <- "../results/study1/fibers/10mm/"
 
 files <- dir(paste0(path), 
              pattern = "*_weighted_4_bands.mat")
@@ -29,7 +31,7 @@ for (f in files) {
 
 subject <- c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16)
 
-### Right hemisphere
+# Organize right hemi ---------------------------------------------------------------
 hemi <- rep(c("right"), times = dim(rh_eccen)[3])
 # this is ugly but ¯\_(ツ)_/¯
 stream <- rep(c("aventral"), times = dim(rh_eccen)[3])
@@ -71,7 +73,7 @@ rh_eccen_org$alpha <- as.factor(ifelse(rh_eccen_org$bands ==1, 1,
                                        ifelse(rh_eccen_org$bands ==2,0.75,
                                               ifelse(rh_eccen_org$bands ==3,0.5,0.25))))
 
-## Key plotting
+# Plot right hemisphere ---------------------------------------------------
 b <- ggplot(rh_eccen_org, aes(x=ROI, y=proportion,col=bands,fill=ROI,alpha=factor(alpha))) +
   scale_x_discrete(limits = positions) +
   scale_y_continuous(limits = c(0,1)) +
@@ -82,12 +84,13 @@ b <- ggplot(rh_eccen_org, aes(x=ROI, y=proportion,col=bands,fill=ROI,alpha=facto
   labs(y = "Proportion fiber endpoints", x = "ROI") +
   theme(plot.title = element_text(hjust = 0.5)) +
   scale_alpha_manual(values = c("0.25"=0.25, "0.5"=0.5, "0.75"=0.75, "1"=1), guide='none')+
-  scale_fill_manual(values=c("#009900","#d73027", "#fdae61",  "#4575b4", "#f46d43",  "#74add1"), guide = 'none')+
+  scale_fill_manual(values=c("#d73027", "#f46d43", "#fdae61", "#74add1","#4575b4", "#009900"), guide = 'none')+
   scale_colour_manual(values=c("#000000", "#000000", "#000000", "#000000", "#000000", "#000000"), guide = 'none') 
 b
 ggsave("figs/7b_rh.pdf", b, width=5, height=5)
 
-## Stats
+# Stats for right hemisphere ---------------------------------------------------
+
 # Some summary stats 
 stable <- ddply(rh_eccen_org, c("ROI", "bands"), summarise,
                N    = length(proportion),
@@ -97,23 +100,21 @@ stable <- ddply(rh_eccen_org, c("ROI", "bands"), summarise,
 stable
 
 
-library(lmerTest)
 # for stats
 rh_face <- bind_rows(IOG_gather, pFus_gather, mFus_gather, pSTS_gather,mSTS_gather)
 levels(rh_face$ROI) <- c("IOG", "pFus", "mFus", "pSTS", "mSTS")
 rh_face$ROI <- factor(rh_face$ROI)
 rh_face$stream <- factor(rh_face$stream)
-#rh_face$bands <- as.numeric(rh_face$bands)
 mod.lme <- lmer(proportion ~ stream*bands + (1|subject), data = rh_face)
 summary(mod.lme)
 anova(mod.lme,type=c("III")) 
-library(lsmeans)
+
 mod.lsm <- lsmeans::lsmeans(mod.lme, ~ stream*bands)
 mod.lsm
 contrast(mod.lsm,method="tukey",by="bands")
 
 
-### Left hemisphere
+# Organize left hemi ---------------------------------------------------------------
 hemi <- rep(c("left"), times = dim(lh_eccen)[3])
 # this is ugly but ¯\_(ツ)_/¯
 stream <- rep(c("aventral"), times = dim(lh_eccen)[3])
@@ -155,7 +156,7 @@ lh_eccen_org$alpha <- as.factor(ifelse(lh_eccen_org$bands ==1, 1,
                                        ifelse(lh_eccen_org$bands ==2,0.75,
                                               ifelse(lh_eccen_org$bands ==3,0.5,0.25))))
 
-## Key plotting
+# Plot left hemi ---------------------------------------------------------------
 b <- ggplot(lh_eccen_org, aes(x=ROI, y=proportion,col=bands,fill=ROI,alpha=factor(alpha))) +
   scale_x_discrete(limits = positions) +
   scale_y_continuous(limits = c(0,1)) +
@@ -166,12 +167,12 @@ b <- ggplot(lh_eccen_org, aes(x=ROI, y=proportion,col=bands,fill=ROI,alpha=facto
   labs(y = "Proportion fiber endpoints", x = "ROI") +
   theme(plot.title = element_text(hjust = 0.5)) +
   scale_alpha_manual(values = c("0.25"=0.25, "0.5"=0.5, "0.75"=0.75, "1"=1), guide='none')+
-  scale_fill_manual(values=c("#009900","#d73027", "#fdae61",  "#4575b4", "#f46d43",  "#74add1"), guide = 'none')+
+  scale_fill_manual(values=c("#d73027", "#f46d43", "#fdae61", "#74add1","#4575b4", "#009900"), guide = 'none')+
   scale_colour_manual(values=c("#000000", "#000000", "#000000", "#000000", "#000000", "#000000"), guide = 'none') 
 b
 ggsave("figs/7b_lh.pdf", b, width=5, height=5)
 
-## Stats
+# Stats for left hemi ---------------------------------------------------------------
 # Some summary stats 
 stable <- ddply(lh_eccen_org, c("ROI", "bands"), summarise,
                 N    = length(proportion),

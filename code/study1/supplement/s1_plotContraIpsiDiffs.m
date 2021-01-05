@@ -19,9 +19,10 @@ savePath = [exptDir 'results/study1/pRFs'];
 figDir = [exptDir 'results/study1/figs/manuscript'];
 
 % params
-ve_cutoff = .10;
-fieldRange = 30;
+ve_cutoff = .20;
+fieldRange = 40;
 norm = 0;
+voxthresh = 10;
 
 %% Set up ROIs
 allROIs = standardROIs;
@@ -33,7 +34,7 @@ IOG = 4; pFus = 5; mFus = 6; pSTS = 7; mSTS = 8; CoS = 9;
 for h = 1:length(hems)
     
     %% Let's load previously saved coverage
-    dataFile = fullfile(savePath, [hems{h} '_coverage_data_ve', num2str(ve_cutoff*100), '_' num2str(fieldRange)]);
+    dataFile = fullfile(savePath, [hems{h} '_coverage_data_ve', num2str(ve_cutoff*100), '_' num2str(fieldRange) '_voxthresh' num2str(voxthresh) '_10mmcontrol']);
     load(dataFile);
 
     % average
@@ -91,7 +92,7 @@ for h = 1:length(hems)
     end
     set(gcf, 'PaperPositionMode', 'auto');
     brighten(gcf,-0.2)
-    saveFigFile = fullfile(figDir, [hems{h} '_f_contraIpsi_ve', num2str(ve_cutoff*100), '_' num2str(fieldRange) '.fig']); 
-    print('-r300', '-dpng', fullfile(figDir, [hems{h} '_f_contraIpsi_ve', num2str(ve_cutoff*100) '_' num2str(fieldRange)]));
+    saveFigFile = fullfile(figDir, [hems{h} '_f_contraIpsi_ve', num2str(ve_cutoff*100), '_' num2str(fieldRange) '_10mmcontrol.fig']); 
+    print('-r300', '-dpng', fullfile(figDir, [hems{h} '_f_contraIpsi_ve', num2str(ve_cutoff*100) '_' num2str(fieldRange) '_10mmcontrol']));
     saveas(gcf, saveFigFile)
 end

@@ -14,8 +14,8 @@ close all
 hems = {'rh' 'lh'};
 
 % params
-eThresh = 40; 
-vThresh = 0.10;
+eThresh = 20; %40
+vThresh = 0.20; 
 trim = 0;
 siginput = Inf; %to pull the line data
 sigthresh = Inf;
@@ -58,7 +58,7 @@ control_varByBand = NaN(length(hems), length(sessions), length(roiNames), 4); %d
 for h = 1:length(hems)
 
     % Which file would you like to visualize?
-    fileName = [hems{h}, '_ve', num2str(vThresh*100), 'sigthresh', num2str(siginput), 'eccen', num2str(eThresh), '_EccVsSigma_lineData'];
+    fileName = [hems{h}, '_ve', num2str(vThresh*100), 'sigthresh', num2str(siginput), 'eccen', num2str(eThresh), '_EccVsSigma_lineData_10mmcontrol'];
 
     load(fullfile(dataDir, fileName));
 
@@ -94,12 +94,12 @@ for h = 1:length(hems)
             eccent = lineData{1, i}(1, m).ecc;
             sigma = lineData{1, i}(1, m).sigma;
 
-            %remove eccen vals where variance < threshold or sigma less
+            %remove eccen vals where variance <= threshold or sigma less
             %than model limits (0.21)
             eccent(variance <= vThresh) = NaN;
-            eccent(eccent > eThresh) = NaN;
-            eccent(sigma < 0.21) = NaN;
-            eccent(sigma > sigthresh) = NaN;
+            eccent(eccent >= eThresh) = NaN;
+            eccent(sigma <= 0.21) = NaN;
+            eccent(sigma >= sigthresh) = NaN;
 
             %now remove these voxels from corresponding sigma and variance
             %variables
@@ -168,19 +168,19 @@ for h = 1:length(hems)
             control_varByBand(h,:,roi,3); control_varByBand(h,:,roi,4)]';
     end
     
-    saveMatFile = fullfile(dataDir, [hems{h}, '_eccenBands_' num2str(eThresh) '_ve', num2str(vThresh*100) '.mat']);
+    saveMatFile = fullfile(dataDir, [hems{h}, '_eccenBands_' num2str(eThresh) '_ve', num2str(vThresh*100) '_10mmcontrol.mat']);
     save(saveMatFile, 'eccenByBand');
-    saveMatFile = fullfile(dataDir, [hems{h}, '_eccenBandsControl_' num2str(eThresh) '_ve', num2str(vThresh*100) '.mat']);
+    saveMatFile = fullfile(dataDir, [hems{h}, '_eccenBandsControl_' num2str(eThresh) '_ve', num2str(vThresh*100) '_10mmcontrol.mat']);
     save(saveMatFile, 'eccenByBandControl');
     
-    saveMatFile = fullfile(dataDir, [hems{h} '_sigBands_' num2str(eThresh) '_ve', num2str(vThresh*100) '.mat']);
+    saveMatFile = fullfile(dataDir, [hems{h} '_sigBands_' num2str(eThresh) '_ve', num2str(vThresh*100) '_10mmcontrol.mat']);
     save(saveMatFile, 'sigByBand');
-    saveMatFile = fullfile(dataDir, [hems{h} '_sigBandsControl_' num2str(eThresh) '_ve', num2str(vThresh*100) '.mat']);
+    saveMatFile = fullfile(dataDir, [hems{h} '_sigBandsControl_' num2str(eThresh) '_ve', num2str(vThresh*100) '_10mmcontrol.mat']);
     save(saveMatFile, 'sigByBandControl');
     
-    saveMatFile = fullfile(dataDir, [hems{h} '_varBands_' num2str(eThresh) '_ve', num2str(vThresh*100) '.mat']);
+    saveMatFile = fullfile(dataDir, [hems{h} '_varBands_' num2str(eThresh) '_ve', num2str(vThresh*100) '_10mmcontrol.mat']);
     save(saveMatFile, 'veByBand');
-    saveMatFile = fullfile(dataDir, [hems{h} '_varBandsControl_' num2str(eThresh) '_ve', num2str(vThresh*100) '.mat']);
+    saveMatFile = fullfile(dataDir, [hems{h} '_varBandsControl_' num2str(eThresh) '_ve', num2str(vThresh*100) '_10mmcontrol.mat']);
     save(saveMatFile, 'veByBandControl');
 
 
@@ -221,12 +221,12 @@ for h = 1:length(hems)
     ylabel('Median Eccentricity (deg.)', 'FontSize', 18)
 
     set(gcf, 'PaperPositionMode', 'auto');
-    saveFile = [hems{h}, '_pRF_median_size_and_eccentricity_upTo', num2str(eThresh), '_sigthresh', num2str(sigthresh), '_ve', num2str(vThresh*100), '.fig'];
+    saveFile = [hems{h}, '_pRF_median_size_and_eccentricity_upTo', num2str(eThresh), '_sigthresh', num2str(sigthresh), '_ve', num2str(vThresh*100), '_10mmcontrol.fig'];
     saveas(gcf, fullfile(figDir, saveFile))
-    print('-r300', '-dpng', fullfile(figDir, [hems{h}, '_pRF_median_size_and_eccentricity_upTo', num2str(eThresh), '_sigthresh', num2str(sigthresh), '_ve', num2str(vThresh*100)]))
+    print('-r300', '-dpng', fullfile(figDir, [hems{h}, '_pRF_median_size_and_eccentricity_upTo', num2str(eThresh), '_sigthresh', num2str(sigthresh), '_ve', num2str(vThresh*100) '_10mmcontrol']))
     
     %save ecc and sig medians
-    saveMatFile = fullfile(dataDir, [hems{h}, '_pRF_median_size_and_eccentricity_upTo', num2str(eThresh) ,'_ve', num2str(vThresh*100), '.mat']);
+    saveMatFile = fullfile(dataDir, [hems{h}, '_pRF_median_size_and_eccentricity_upTo', num2str(eThresh) ,'_ve', num2str(vThresh*100), '_10mmcontrol.mat']);
     fix_ecc = squeeze(ecc(h,:,:))';
     fix_sig = squeeze(sig(h,:,:))';
     save(saveMatFile, 'fix_ecc', 'fix_sig')

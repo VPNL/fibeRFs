@@ -15,6 +15,10 @@ function s1_createFDWM(control)
 % Updated 11/2019 by DF
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+if notDefined('control')
+    control = 0;
+end
+
 % get our list of subjects from the Set function:
 s1_setAllSessions
 
@@ -50,6 +54,8 @@ for h = 1:length(hems)
             maps = horzcat(maps,{[ROIPre hems{h} '_' faceROIs{r} '_5mm_projed_gmwmi.mat']});
         end
         ROIs = horzcat(maps,{['fibeRFs_f_' hems{h} '_' placeROIs{1} '_5mm_projed_gmwmi.mat']}); %add CoS places
+    elseif control == 2  %10mm control analysis for mSTS
+        ROIs = {[ROIPre hems{h} '_mSTS_faces_10mm_projed_gmwmi.mat']};
     else
         maps = horzcat(maps,{['fibeRFs_f_' hems{h} '_EVC_projed_gmwmi.mat']});
         for r = 1:length(faceROIs) %face ROIs
@@ -106,11 +112,20 @@ for h = 1:length(hems)
 
         %% 3) Display the fibers
         for r = 1:length(runName)
-            for n = 2:length(ROIs) %don't plot EVC (way too many fibers)
-                ROIName = strsplit(ROIs{n}, '.');
-                ROIfg = [ROIName{1}, '_r', num2str(rad), '.00_WholeBrainFG.mat'];
-                foi = 1; %as we want all tracts
-                fatRenderFibers(dtiDir, dMRI_sessions{s}, runName{r}, ROIfg, foi, t1_name, hems{h});
+            if control == 0
+                for n = 2:length(ROIs) %don't plot EVC (way too many fibers)
+                    ROIName = strsplit(ROIs{n}, '.');
+                    ROIfg = [ROIName{1}, '_r', num2str(rad), '.00_WholeBrainFG.mat'];
+                    foi = 1; %as we want all tracts
+                    fatRenderFibers(dtiDir, dMRI_sessions{s}, runName{r}, ROIfg, foi, t1_name, hems{h});
+                end
+            else
+                for n = 1:length(ROIs) %don't plot EVC (way too many fibers)
+                    ROIName = strsplit(ROIs{n}, '.');
+                    ROIfg = [ROIName{1}, '_r', num2str(rad), '.00_WholeBrainFG.mat'];
+                    foi = 1; %as we want all tracts
+                    fatRenderFibers(dtiDir, dMRI_sessions{s}, runName{r}, ROIfg, foi, t1_name, hems{h});
+                end
             end
         end
 

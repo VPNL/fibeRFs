@@ -41,11 +41,11 @@ V1 = 1; V2 = 2; V3 = 3;
 IOG = 4; pFus = 5; mFus = 6; pSTS = 7; mSTS = 8; CoS = 9;
 
 %% Set threshold variables here:
-vethresh = 0.10;
-fieldRange = 40;
+vethresh = 0.20; 
+fieldRange = 20; %40;
 eccthresh = [0.5, fieldRange - 0.5]; %avoid edging effects
 sigthresh = [0.21, Inf]; 
-voxthresh = 25; %min number of voxels
+voxthresh = 10; %min number of voxels
 
 % The structure in which we will store all subject data to save out:
 lineData = {};
@@ -62,7 +62,7 @@ for h = 1:length(hems)
     end
     roiList = horzcat(maps,{[fROIPre hems{h} '_' placeROIs{1}]}); %add CoS places
     
-    saveFile = [hems{h} '_ve', num2str(vethresh*100), 'sigthresh', num2str(sigthresh(2)), 'eccen', num2str(round(eccthresh(2))), '_EccVsSigma_lineData'];
+    saveFile = [hems{h} '_ve', num2str(vethresh*100), 'sigthresh', num2str(sigthresh(2)), 'eccen', num2str(round(eccthresh(2))), '_EccVsSigma_lineData_10mmcontrol'];
 
     for s = 1:length(sessions)
 
@@ -86,6 +86,9 @@ for h = 1:length(hems)
                 view = loadROI(view, roiListNew);
 
                 list = 1:length(viewGet(view, 'ROIs'));
+                
+                %sigma output from this is actually sigma/sqrt(exponent) -
+                %consistent with the rest of the code (calculated in rmGet)
                 data = s_rmPlotMultiEccSigma(view, list, vethresh, eccthresh, sigthresh, voxthresh);
 
                 lineData{s} = data;

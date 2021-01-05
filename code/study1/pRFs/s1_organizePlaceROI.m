@@ -39,7 +39,7 @@ newPre = 'fiberRFsclean_f_';     % preFix to add to the ROI name - usually expt_
 
 %%%%% comment field information - session & anat will be auto-filled
 comment.name = 'Dawn Finzi';
-comment.note = 'Oct 2019';
+comment.note = 'Oct 2020';
 outStr = []; % aggregate output information, display at end (since mrV output will disrupt readability)
 
 %%%%% output info
@@ -82,16 +82,24 @@ for h = 1:length(hems)
         
         % input and output ROI names for this hemisphere
         inROI = ['latprf_f_' hems{h},'_' ROIs{r}];
+        backupROI = ['fibeRFs_f_' hems{h},'_' ROIs{r}];
         outROI = strcat(newPre,hems{h},'_',ROIs{r});
         info{s}.outROIs{h,r} = outROI;
         
         % check if they exist in the current loc shared path
         if (~exist(fullfile('3DAnatomy','ROIs',[inROI '.mat'])) && ~exist(fullfile('3Danatomy','ROIs',[inROI '.mat']))) %case issues
-            fprintf('Missing %s...\n',inROI);
-            info{s}.missing = [info{s}.missing inROI];
-            missing = missing + 1;
-            outStr = [outStr sprintf('Missing %s %s...\n',sessions{s},inROI)];
-        else
+            if (~exist(fullfile('3DAnatomy','ROIs',[backupROI '.mat'])) && ~exist(fullfile('3Danatomy','ROIs',[backupROI '.mat']))) %case issues
+                fprintf('Missing %s...\n',inROI);
+                info{s}.missing = [info{s}.missing inROI];
+                missing = missing + 1;
+                outStr = [outStr sprintf('Missing %s %s...\n',sessions{s},inROI)];
+            else
+                inROI = backupROI;
+            end
+        end
+        
+        if (exist(fullfile('3DAnatomy','ROIs',[inROI '.mat'])) || exist(fullfile('3Danatomy','ROIs',[inROI '.mat']))) %if determined backup or main naming ROI exists
+
             
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % scrape info about localizer & add comments

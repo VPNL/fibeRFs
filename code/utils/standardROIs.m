@@ -1,7 +1,7 @@
 function [ROIs] = standardROIs(which)
 % choose all or some of our most-used ROIs (to save time typing)
 % credit to Sonia
-ROIset = {'V1' 'V2' 'V3' 'IOG_faces' 'pFus_faces' 'mFus_faces' 'pSTS_faces' 'mSTS_faces' 'CoS_places'};
+ROIset = {'V1' 'V2' 'V3' 'IOG_faces' 'pFus_faces' 'mFus_faces' 'pSTS_faces' 'mSTS_faces_10mm' 'CoS_places'};
 
 if ~exist('which','var')
     n = 1:length(ROIset);

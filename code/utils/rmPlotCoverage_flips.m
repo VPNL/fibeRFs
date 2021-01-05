@@ -85,6 +85,7 @@ else
             case 'normalizerange', vfc.normalizeRange = varargin{ii+1}; % boolean
             case 'smoothsigma', vfc.smoothSigma = varargin{ii+1}; % boolean
             case 'cothresh', vfc.cothresh = varargin{ii+1};
+            case 'sigmathresh', vfc.sigthresh = varargin{ii+1}; %DF 11/2020           
             case 'eccthresh', vfc.eccthresh = varargin{ii+1};
             case 'nsamples', vfc.nSamples = varargin{ii+1};
             case 'minmeanmap', vfc.meanThresh = varargin{ii+1};
@@ -118,6 +119,7 @@ curScan = viewGet(vw, 'curScan');
 % current ROI.
 vt      = vw.viewType;
 co      = rmCoordsGet(vt, rmModel,'varexp',     roi.indices);
+sigsize = rmCoordsGet(vt, rmModel,'sigma',      roi.indices); %DF 11/2020 - sig/sqrt(exp)
 sigma1  = rmCoordsGet(vt, rmModel,'sigmamajor', roi.indices);
 sigma2  = rmCoordsGet(vt, rmModel,'sigmaminor', roi.indices);
 theta   = rmCoordsGet(vt, rmModel,'sigmatheta', roi.indices);
@@ -198,9 +200,10 @@ if NaNs
     ecc = ecc(notNaNs);
 end
 
-% Find voxels which satisfy cothresh and eccthresh.
+% Find voxels which satisfy cothresh and eccthresh and sigthresh. %DF fix
+% 11/2020
 coIndices = co > vfc.cothresh & ...
-    ecc >= vfc.eccthresh(1) & ecc <= vfc.eccthresh(2);
+    ecc >= vfc.eccthresh(1) & ecc <= vfc.eccthresh(2) & sigma1 >= vfc.sigthresh;
 if ~any(coIndices)
     fprintf(1, '[%s]:No values above threshold.\n', mfilename);
     RFcov = zeros(vfc.nSamples);
@@ -243,6 +246,7 @@ end
 subCo = co(coIndices);
 subPh = ph(coIndices);
 subEcc = ecc(coIndices);
+subSigSize = single(sigsize(coIndices)); %DF 11/2020 - sig/sqrt(exp)
 subSize1 = single(sigma1(coIndices));
 subSize2 = single(sigma2(coIndices));
 subTheta = single(theta(coIndices));
@@ -252,10 +256,11 @@ if vfc.css == 1
     subExp = exp(coIndices); %DF 2020
 end
 
-%% redo subSize1 to take exponent into account - DF 2020
-if vfc.css == 1
-    subSize1 = single(subSize1./(sqrt(subExp)));
-end
+%% THIS IS ACTUALLY ALREADY COVERED AS A CASE IN RMGET
+% %% redo subSize1 to take exponent into account - DF 2020
+% if vfc.css == 1
+%     subSize1 = single(subSize1./(sqrt(subExp)));
+% end
 
 %% smooth sigma
 if vfc.smoothSigma
@@ -278,25 +283,32 @@ if vfc.smoothSigma
         vfc.smoothSigma = 3; %default
     end
     n = vfc.smoothSigma;
-
-    %check sigma1==sigma2
-    if subSize1 == subSize2
-        for ii = 1:length(subSize1)
-            %compute nearest coords
-            dev = sqrt(abs(subx0(ii)-subx0).^2+abs(suby0(ii)-suby0).^2);
-            [dev, ix] = sort(dev); %#ok<*ASGLU>
-            subSize1(ii) = median(subSize1(ix(1:n)));
-        end
-        subSize2 = subSize1;
-    else
-        for ii = 1:length(subSize1)
-            %compute nearest coords
-            dev = sqrt(abs(subx0(ii)-subx0).^2+abs(suby0(ii)-suby0).^2);
-            [dev, ix] = sort(dev);
-            subSize1(ii) = median(subSize1(ix(1:n)));
-            subSize2(ii) = median(subSize2(ix(1:n)));
-        end
+    
+    for ii = 1:length(subSigSize)
+        %compute nearest coords
+        dev = sqrt(abs(subx0(ii)-subx0).^2+abs(suby0(ii)-suby0).^2);
+        [dev, ix] = sort(dev);
+        subSigSize(ii) = median(subSigSize(ix(1:n)));
     end
+    
+%     %check sigma1==sigma2
+%     if subSize1 == subSize2
+%         for ii = 1:length(subSize1)
+%             %compute nearest coords
+%             dev = sqrt(abs(subx0(ii)-subx0).^2+abs(suby0(ii)-suby0).^2);
+%             [dev, ix] = sort(dev); %#ok<*ASGLU>
+%             subSize1(ii) = median(subSize1(ix(1:n)));
+%         end
+%         subSize2 = subSize1;
+%     else
+%         for ii = 1:length(subSize1)
+%             %compute nearest coords
+%             dev = sqrt(abs(subx0(ii)-subx0).^2+abs(suby0(ii)-suby0).^2);
+%             [dev, ix] = sort(dev);
+%             subSize1(ii) = median(subSize1(ix(1:n)));
+%             subSize2(ii) = median(subSize2(ix(1:n)));
+%         end
+%     end
 end
 
 % polar plot
@@ -318,6 +330,7 @@ if vfc.newfig > -1 % -1 is a flag that we shouldn't plot the results
     data.subEcc = subEcc;
     data.subx0 = subx0;
     data.suby0 = suby0;
+    data.subSigSize = subSigSize;
     data.subSize1 = subSize1;
     data.subSize2 = subSize2;
     data.X = X;
@@ -361,7 +374,7 @@ weight = single(weight);
 
 %% computations aside in their own subroutine. (ras)
 if isequal(lower(vfc.method), 'density')
-    RFcov = prfCoverageDensityMap(vw, subx0, suby0, subSize1, X, Y);
+    RFcov = prfCoverageDensityMap(vw, subx0, suby0, subSigSize, X, Y); %DF 11/2020 use subSigSize instead
 
     all_models = []; % not created for this option
     if vfc.newfig == -1

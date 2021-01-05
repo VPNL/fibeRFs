@@ -8,8 +8,8 @@ library(plyr)
 
 sem <- function(x) {sd(x, na.rm=TRUE) / sqrt(sum(!is.na((x))))}
 
-#set results path
-path <- "../results/study1/fibers/"
+# Load data ---------------------------------------------------------------
+path <- "../results/study1/fibers/10mm/"
 
 files <- dir(paste0(path), 
              pattern = "*_fibers_overall_per_ROI.mat")
@@ -27,6 +27,8 @@ for (f in files) {
 }
 
 subject <- c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16)
+
+# Organize data ---------------------------------------------------------------
 
 ROI <- rep(c("IOG"), times = 16)
 right <- rh_fibers[,1]
@@ -59,12 +61,12 @@ left <- lh_fibers[,6]
 CoS <- data.frame(subject,ROI,left,right)
 CoS_gather <- gather(CoS,"hemi","proportion", 3:4)
 
-
 test <- bind_rows(IOG_gather, pFus_gather, mFus_gather, pSTS_gather, mSTS_gather, CoS_gather)
 levels(test$ROI) <- c("IOG", "pFus", "mFus", "pSTS", "mSTS", "CoS")
 positions <- c("IOG", "pFus", "mFus", "pSTS", "mSTS", "CoS")
 
-## Key plotting
+# Plotting and summary stats ---------------------------------------------------------------
+
 b <- ggplot(test, aes(x=ROI, y=proportion, col=ROI)) + 
   scale_x_discrete(limits = positions) +
   scale_y_continuous(limits = c(0,0.9), breaks = c(0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0)) +
@@ -74,7 +76,7 @@ b <- ggplot(test, aes(x=ROI, y=proportion, col=ROI)) +
   labs(title = "Proportion of all fROI fibers connecting to EVC",
        y = "Proportion", x = "ROI") +
   theme(plot.title = element_text(hjust = 0.5)) +
-  scale_colour_manual(values=c("#009900","#d73027", "#fdae61",  "#4575b4", "#f46d43",  "#74add1"), guide = 'none')  +
+  scale_colour_manual(values=c("#d73027", "#f46d43", "#fdae61", "#74add1","#4575b4", "#009900"), guide = 'none')  +
   scale_fill_manual(values=c("#C0C0C0","#696969"), guide = 'none') 
 b
 ggsave("figs/6b.pdf", b, width=5, height=5)

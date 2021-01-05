@@ -1,4 +1,4 @@
-% Code for generating figure 4B in Finzi et al 2020
+% s1_covByRadialDist_contraOnly.m
 %
 % This script calculates the proportion of VFC by radial distance from the
 % fovea for each ROI of interest and plots
@@ -17,7 +17,7 @@ hems = {'rh' 'lh'};
 s1_setAllSessions
 total_N = length(sessions);
 
-% change exptDir and figDir to match the paths on your computer
+% where do the subjects live
 expt = '/projects/fibeRFs/'; 
 exptDir = fullfile(RAID,expt);
 
@@ -26,8 +26,9 @@ savePath = [exptDir 'results/study1/pRFs'];
 figDir = [exptDir 'results/study1/figs/manuscript'];
 
 % params
-ve_cutoff = .10;
-fieldRange = 40;
+ve_cutoff = .20; 
+fieldRange = 40;% 40;
+thresh = 10;
 norm = 0;
 
 %% Set up ROIs
@@ -40,7 +41,7 @@ for h=1:length(hems)
     clear indivs condensed
     
     %% Let's load previously saved coverage
-    dataFile = fullfile(savePath, [hems{h} '_coverage_data_ve', num2str(ve_cutoff*100), '_' num2str(fieldRange)]);
+    dataFile = fullfile(savePath, [hems{h} '_coverage_data_ve', num2str(ve_cutoff*100), '_' num2str(fieldRange) '_voxthresh' num2str(thresh) '_10mmcontrol']);
     load(dataFile);
     
     %% Now plot
@@ -76,46 +77,59 @@ for h=1:length(hems)
     else
         radialDist = radialDist(:,65:128);
     end
-
-    %%
+    
+    flatDist = radialDist(:);
+    
+    %% create indivs separately for each hemi (somewhat redundant - TODO)
+    shape = squeeze(fits(1).coverage(:,:,1)).*mask;
+    if strcmp(hems{h},'rh')
+        shape = shape(:,1:64);
+    else
+        shape = shape(:,65:128);
+    end
+    flatA = shape(:);
+    full = [flatDist, flatA];
+    full = sortrows(full);
+    edge = find(full(:,1)<fieldRange-0.5); 
+    trimmed = full(edge,:);
+    trimmed = round(trimmed,rounding); % round to help find out
+    indivs = unique(trimmed(:,1));
+                
+    condensed = NaN(CoS, total_N, length(indivs)); 
+    
+    %% calc coverage by radial distance for each subj & ROI
     for ROI = IOG:CoS
-        clear inds
+        
+        N(ROI) = sum(~isnan(squeeze(fits(ROI).coverage(1,1,:))));
 
-        N(ROI) =  sum(~isnan(squeeze(fits(ROI).coverage(1,1,:))));
-        inds = find(~isnan(fits(ROI).coverage(1,1,:)));
-
-        cov(ROI,:,:,1:N(ROI)) = fits(ROI).coverage(:,:,inds);
-
-        flatDist = radialDist(:);
-
-        for s = 1:N(ROI)
+        for s = 1:length(sessions)
             
-            a = squeeze(cov(ROI,:,:,s)).*mask; %mask bits outside of circle!
-            
-            %restrict coverage to contralateral visual field only
-            if strcmp(hems{h},'rh')
-                a = a(:,1:64);
-            else
-                a = a(:,65:128);
-            end
-            flatA = a(:);
+            if ~isnan(fits(ROI).coverage(1,1,s))
+                
+                a = squeeze(fits(ROI).coverage(:,:,s)).*mask;
 
-            full = [flatDist, flatA];
-            full = sortrows(full);
-            edge = find(full(:,1)<fieldRange-0.5); 
-            trimmed = full(edge,:);
-            trimmed = round(trimmed,rounding); % round to help find out
+                %restrict coverage to contralateral visual field only
+                if strcmp(hems{h},'rh')
+                    a = a(:,1:64);
+                else
+                    a = a(:,65:128);
+                end
+                flatA = a(:);
 
-            indivs = unique(trimmed(:,1));
-            
-            if ~exist('condensed', 'var')
-                condensed = NaN(CoS, total_N, length(indivs));
-            end
+                full = [flatDist, flatA];
+                full = sortrows(full);
+                edge = find(full(:,1)<fieldRange-0.5); 
+                trimmed = full(edge,:);
+                trimmed = round(trimmed,rounding); % round to help find out
 
-            for i = 1:length(indivs)
-                inds = find(trimmed(:,1) == indivs(i));
+                indivs = unique(trimmed(:,1));
 
-                condensed(ROI,s,i) = mean(trimmed(inds,2));
+                for i = 1:length(indivs)
+                    inds = find(trimmed(:,1) == indivs(i));
+
+                    condensed(ROI,s,i) = mean(trimmed(inds,2));
+                end
+                
             end
 
         end
@@ -131,7 +145,7 @@ for h=1:length(hems)
 
     %ROI indices
     ROI_names = {'IOG', 'pFus', 'mFus', 'pSTS', 'mSTS','CoS'}; 
-    f = figure('Position',[100 100 3500 700]); hold on;
+    f = figure('Position',[100 100 3500 400]); hold on;
     
     i = 1;
     for ROI = IOG:CoS
@@ -148,33 +162,13 @@ for h=1:length(hems)
         i = i+1;
     end
     set(gcf, 'PaperPositionMode', 'auto');
-    saveFigFile = fullfile(figDir,[hems{h} '_radialDist_contraOnly_'  num2str(ve_cutoff*100) '_' num2str(fieldRange) '.fig']);
-    print('-r300','-dpng',fullfile(figDir,[hems{h} '_radialDist_contraOnly_' num2str(ve_cutoff*100) '_' num2str(fieldRange)]))
+    saveFigFile = fullfile(figDir,[hems{h} '_radialDist_contraOnly_'  num2str(ve_cutoff*100) '_' num2str(fieldRange) '_10mmcontrol.fig']);
+    print('-r300','-dpng',fullfile(figDir,[hems{h} '_radialDist_contraOnly_' num2str(ve_cutoff*100) '_' num2str(fieldRange) '_10mmcontrol']))
     saveas(gcf,saveFigFile)
     
-    %% Stats
-    %let's start by fitting a line to all of them (by subject) and testing
-    %slopes
-    
-    for s = 1:total_N %for the 15 subjects
-        for ROI = IOG:CoS
-            if s <= N(ROI)
-                mdl = fitlm(indivs, squeeze(condensed(ROI,s,:))); %fit linear regression
-                Rsquared(ROI-3,s) = mdl.Rsquared.Ordinary;
-                RSME(ROI-3,s) = mdl.RMSE;
-                intercept(ROI-3,s) = mdl.Coefficients.Estimate(1);
-                slope(ROI-3,s) = mdl.Coefficients.Estimate(2);
-            else 
-                Rsquared(ROI-3,s) = NaN;
-                RSME(ROI-3,s) = NaN;
-                intercept(ROI-3,s) = NaN;          
-                slope(ROI-3,s) = NaN;
-            end
-        end
-    end
-
-    saveMatFile = fullfile(savePath,[hems{h} '_radialFits_linear_contraOnly_' num2str(ve_cutoff*100) '_' num2str(fieldRange) '.mat']);
-    save(saveMatFile, 'intercept','slope', 'Rsquared', 'RSME');
+    saveMatFile = fullfile(savePath,[hems{h} '_radial_raw_contraOnly_' num2str(ve_cutoff*100) '_' num2str(fieldRange) '_10mmcontrol.mat']);
+    save(saveMatFile, 'indivs', 'condensed');
+  
 end 
 
 close all

@@ -24,7 +24,7 @@ colors = {'k', 'b', 'b', 'g', 'g', 'y', 'm'};
 
 %%%% naming convention of input & output
 currPre = 'toon_f_'; % preFix to use for loading ROIs (if you've already named them as 'toonRet_f_', etc); if they are just 'hem_ROI', leave this blank
-backupPre = 'latprf_f_';
+backupPre = 'toonRet_f_'; %'latprf_f_'; %'toonRet_f_';
 newPre = 'fibeRFs_f_'; % preFix to add to the ROI name - usualling expt_f/a_. (if you've already named them as 'toonRet_f_', etc, leave this blank
 
 %%%% combine dorsal/ventral areas?
