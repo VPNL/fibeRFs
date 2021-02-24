@@ -4,8 +4,10 @@ library(ggthemes)
 library(R.matlab)
 library(tidyverse)
 library(lmerTest)
+library(effectsize)
+library(lsmeans)
 
-#set results path
+# Load data ---------------------------------------------------------------
 path <- "../results/study1/pRFs/"
 
 files <- dir(paste0(path), 
@@ -78,7 +80,7 @@ lh <- full_join(t,w)
 
 full <- full_join(lh,rh)
 
-##Stats
+# Stats -----------------------------------------------------------------------
 subs.tidy <- gather(full, ROI, mean, 4:9)
 subs.tidy$ROI <- factor(subs.tidy$ROI)
 subs.tidy$exper <- factor(subs.tidy$exper)
@@ -86,7 +88,6 @@ subs.tidy$hemi <- factor(subs.tidy$hemi)
 mod.lme <- lmer(mean ~ hemi*exper*ROI + (1|subject), data = subs.tidy)
 summary(mod.lme)
 anova(mod.lme,type=c("III")) 
-library(lsmeans)
 mod.lsm <- lsmeans::lsmeans(mod.lme, ~ ROI*exper)
 mod.lsm
 contrast(mod.lsm,method="tukey",by="ROI")
@@ -98,11 +99,23 @@ rh.tidy$exper <- factor(rh.tidy$exper)
 rh.tidy$hemi <- factor(rh.tidy$hemi)
 mod.lme <- lmer(mean ~ exper*ROI + (1|subject), data = rh.tidy)
 summary(mod.lme)
-anova(mod.lme,type=c("III")) 
-library(lsmeans)
+ao <- anova(mod.lme,type=c("III")) 
+ao #print anova results
+#calculate effect size from test statistics
+F_to_eta2(
+  f = ao$`F value`,
+  df = ao$NumDF,
+  df_error = ao$DenDF
+  )
+#post-hoc tests
 mod.lsm <- lsmeans::lsmeans(mod.lme, ~ ROI*exper)
 mod.lsm
-contrast(mod.lsm,method="tukey",by="ROI")
+pairs<-contrast(mod.lsm,method="tukey",by="ROI")
+pairs
+pval <- summary(pairs)$p.value #exact p vals for table
+t_to_d(t = summary(pairs)$t.ratio,
+       df_error = summary(pairs)$df[1],
+       pooled=TRUE) #get effect sizes
 
 lh.tidy <- gather(lh, ROI, mean, 4:9)
 lh.tidy$ROI <- factor(lh.tidy$ROI)
@@ -110,8 +123,20 @@ lh.tidy$exper <- factor(lh.tidy$exper)
 lh.tidy$hemi <- factor(lh.tidy$hemi)
 mod.lme <- lmer(mean ~ exper*ROI + (1|subject), data = lh.tidy)
 summary(mod.lme)
-anova(mod.lme,type=c("III")) 
-library(lsmeans)
+ao <- anova(mod.lme,type=c("III")) 
+ao #print anova results
+#calculate effect size from test statistics
+F_to_eta2(
+  f = ao$`F value`,
+  df = ao$NumDF,
+  df_error = ao$DenDF
+)
+#post-hoc tests
 mod.lsm <- lsmeans::lsmeans(mod.lme, ~ ROI*exper)
 mod.lsm
-contrast(mod.lsm,method="tukey",by="ROI")
+pairs<-contrast(mod.lsm,method="tukey",by="ROI")
+pairs
+pval <- summary(pairs)$p.value #exact p vals for table
+t_to_d(t = summary(pairs)$t.ratio,
+       df_error = summary(pairs)$df[1],
+       pooled=TRUE) #get effect sizes

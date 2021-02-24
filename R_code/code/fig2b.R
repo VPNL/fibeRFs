@@ -8,6 +8,7 @@ library(R.matlab)
 library(tidyverse)
 library(plyr)
 library(lmerTest)
+library(effectsize)
 library(lsmeans)
 
 sem <- function(x) {sd(x, na.rm=TRUE) / sqrt(sum(!is.na((x))))}
@@ -113,11 +114,23 @@ rh_face$ROI <- factor(rh_face$ROI)
 rh_face$stream <- factor(rh_face$stream)
 mod.lme <- lmer(proportion ~ stream*bands + (1|subject), data = rh_face)
 summary(mod.lme)
-anova(mod.lme,type=c("III")) 
+ao <- anova(mod.lme,type=c("III")) 
+ao #print anova results
+#calculate effect size from test statistics
+F_to_eta2(
+  f = ao$`F value`,
+  df = ao$NumDF,
+  df_error = ao$DenDF
+)
 #Post-hoc comparisons
 mod.lsm <- lsmeans::lsmeans(mod.lme, ~ stream*bands)
 mod.lsm
-contrast(mod.lsm,method="tukey",by="bands")
+pairs<-contrast(mod.lsm,method="tukey",by="bands")
+pairs
+pval <- summary(pairs)$p.value #exact p vals 
+t_to_d(t = summary(pairs)$t.ratio,
+       df_error = summary(pairs)$df[1],
+       pooled=TRUE) #get effect sizes
 
 #Organize data for later ventral ROI x hemi comparison
 rh_comp <- bind_rows(IOG_gather, pFus_gather, mFus_gather)
@@ -207,11 +220,23 @@ lh_face$ROI <- factor(lh_face$ROI)
 lh_face$stream <- factor(lh_face$stream)
 mod.lme <- lmer(proportion ~ stream*bands + (1|subject), data = lh_face)
 summary(mod.lme)
-anova(mod.lme,type=c("III")) 
+ao <- anova(mod.lme,type=c("III")) 
+ao #print anova results
+#calculate effect size from test statistics
+F_to_eta2(
+  f = ao$`F value`,
+  df = ao$NumDF,
+  df_error = ao$DenDF
+)
 #Post-hoc comparisons
 mod.lsm <- lsmeans::lsmeans(mod.lme, ~ stream*bands)
 mod.lsm
-contrast(mod.lsm,method="tukey",by="bands")
+pairs<-contrast(mod.lsm,method="tukey",by="bands")
+pairs
+pval <- summary(pairs)$p.value #exact p vals 
+t_to_d(t = summary(pairs)$t.ratio,
+       df_error = summary(pairs)$df[1],
+       pooled=TRUE) #get effect sizes
 
 #Organize data for ventral ROI x hemi comparison
 lh_comp <- bind_rows(IOG_gather, pFus_gather, mFus_gather)
@@ -229,10 +254,21 @@ full$stream <- factor(full$stream)
 full$bands <- factor(full$bands)
 mod.lme <- lmer(proportion ~ hemi*ROI*bands + (1|(subject)), data = full)
 summary(mod.lme)
-anova(mod.lme,type=c("III")) 
+ao <- anova(mod.lme,type=c("III")) 
+ao #print anova results
+#calculate effect size from test statistics
+F_to_eta2(
+  f = ao$`F value`,
+  df = ao$NumDF,
+  df_error = ao$DenDF
+)
+#Post-hoc comparisons
 mod.lsm <- lsmeans::lsmeans(mod.lme, ~ hemi*ROI*bands)
 mod.lsm
-contrast(mod.lsm,method="tukey",by=c("ROI","bands"))
-
-
+pairs<-contrast(mod.lsm,method="tukey",by=c("ROI","bands"))
+pairs
+pval <- summary(pairs)$p.value #exact p vals 
+t_to_d(t = summary(pairs)$t.ratio,
+       df_error = summary(pairs)$df[1],
+       pooled=TRUE) #get effect sizes
 

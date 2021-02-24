@@ -1,4 +1,4 @@
-### Differential spatial processing in ventral and lateral face-selective regions is scaffolded by structural connections
+### Differential spatial computations in ventral and lateral face-selective regions are scaffolded by structural connections
 **Dawn Finzi, Jesse Gomez, Marisa Nordt, Alex A. Rezai, Sonia Poltoratski, Kalanit Grill-Spector**
 
 This repository contains code to analyze the data, compute statistics, and make the individual figure elements. 
@@ -23,6 +23,7 @@ tidyverse
 plyr
 lmerTest
 lsmeans
+effectsize
 dplyr
 PairedData
 ```
@@ -31,4 +32,4 @@ The matlab analysis code in `code/` was run using Matlab2015a, and relies heavil
 
 Other than the specified figure generation code, some of the matlab code may not run on your local machine as some of the functions use absolute paths to niftis and FreeSurfer surfaces which are not currently included. 
 
-Please see the data availability statement in Finzi et. al., 2020 for more and contact me with any questions at: <dfinzi@stanford.edu>
+Please see the data availability statement in Finzi et. al., 2021 for more and contact me with any questions at: <dfinzi@stanford.edu>

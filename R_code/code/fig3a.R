@@ -5,6 +5,7 @@ rm(list=ls())
 library(R.matlab)
 library(tidyverse)
 library(lmerTest)
+library(effectsize)
 library(lsmeans)
 library(dplyr)
 library(PairedData)
@@ -107,10 +108,20 @@ plot(pd, type = "profile") + theme_bw()
 #Paired t-test by streams
 rh_t <- t.test(aventral, blateral, paired = TRUE)
 rh_t
+t_to_d(t = rh_t$statistic,
+       df_error = rh_t$parameter,
+       pooled=TRUE) #get effect sizes
 #driven by pSTS?
 mod.lme <- lmer(sig ~ ROI + (1|subject), data = rh_face)
 summary(mod.lme)
-anova(mod.lme,type=c("III")) 
+ao <- anova(mod.lme,type=c("III")) 
+ao #print anova results
+#calculate effect size from test statistics
+F_to_eta2(
+  f = ao$`F value`,
+  df = ao$NumDF,
+  df_error = ao$DenDF
+)
 mod.lsm <- lsmeans::lsmeans(mod.lme, ~ROI)
 mod.lsm
 pairs<-contrast(mod.lsm,method="tukey")
@@ -196,10 +207,20 @@ plot(pd, type = "profile") + theme_bw()
 # paired t-test by streams
 lh_t <- t.test(lh_aventral, lh_blateral, paired = TRUE)
 lh_t
+t_to_d(t = lh_t$statistic,
+       df_error = lh_t$parameter,
+       pooled=TRUE) #get effect sizes
 ## again driven by pSTS
 mod.lme <- lmer(sig ~ ROI + (1|subject), data = lh_face)
 summary(mod.lme)
-anova(mod.lme,type=c("III")) 
+ao <- anova(mod.lme,type=c("III")) 
+ao #print anova results
+#calculate effect size from test statistics
+F_to_eta2(
+  f = ao$`F value`,
+  df = ao$NumDF,
+  df_error = ao$DenDF
+)
 mod.lsm <- lsmeans::lsmeans(mod.lme, ~ROI)
 mod.lsm
 pairs<-contrast(mod.lsm,method="tukey")

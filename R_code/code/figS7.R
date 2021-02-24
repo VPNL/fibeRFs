@@ -7,6 +7,7 @@ library(R.matlab)
 library(tidyverse)
 library(plyr)
 library(lmerTest)
+library(effectsize)
 library(lsmeans)
 
 
@@ -90,7 +91,7 @@ b <- ggplot(rh_eccen_org, aes(x=ROI, y=proportion,col=bands,fill=ROI,alpha=facto
   scale_fill_manual(values=c("#009900","#d73027", "#fdae61",  "#4575b4", "#f46d43",  "#74add1"), guide = 'none')+
   scale_colour_manual(values=c("#000000", "#000000", "#000000", "#000000", "#000000", "#000000"), guide = 'none') 
 b
-ggsave("figs/S5_rh.pdf", b, width=5, height=5)
+ggsave("figs/S7_rh.pdf", b, width=5, height=5)
 
 # Stats for right hemisphere ---------------------------------------------------
 
@@ -110,7 +111,14 @@ rh_face$ROI <- factor(rh_face$ROI)
 rh_face$stream <- factor(rh_face$stream)
 mod.lme <- lmer(proportion ~ stream*bands + (1|subject), data = rh_face)
 summary(mod.lme)
-anova(mod.lme,type=c("III")) 
+ao <- anova(mod.lme,type=c("III")) 
+ao #print anova results
+#calculate effect size from test statistics
+F_to_eta2(
+  f = ao$`F value`,
+  df = ao$NumDF,
+  df_error = ao$DenDF
+) 
 
 mod.lsm <- lsmeans::lsmeans(mod.lme, ~ stream*bands)
 mod.lsm
@@ -173,7 +181,7 @@ b <- ggplot(lh_eccen_org, aes(x=ROI, y=proportion,col=bands,fill=ROI,alpha=facto
   scale_fill_manual(values=c("#009900","#d73027", "#fdae61",  "#4575b4", "#f46d43",  "#74add1"), guide = 'none')+
   scale_colour_manual(values=c("#000000", "#000000", "#000000", "#000000", "#000000", "#000000"), guide = 'none') 
 b
-ggsave("figs/S5_lh.pdf", b, width=5, height=5)
+ggsave("figs/S7_lh.pdf", b, width=5, height=5)
 
 # Stats for left hemi ---------------------------------------------------------------
 # Some summary stats 
@@ -191,7 +199,14 @@ lh_face$ROI <- factor(lh_face$ROI)
 lh_face$stream <- factor(lh_face$stream)
 mod.lme <- lmer(proportion ~ stream*bands + (1|subject), data = lh_face)
 summary(mod.lme)
-anova(mod.lme,type=c("III")) 
+ao <- anova(mod.lme,type=c("III")) 
+ao #print anova results
+#calculate effect size from test statistics
+F_to_eta2(
+  f = ao$`F value`,
+  df = ao$NumDF,
+  df_error = ao$DenDF
+) 
 mod.lsm <- lsmeans::lsmeans(mod.lme, ~ stream*bands)
 mod.lsm
 contrast(mod.lsm,method="tukey",by="bands")

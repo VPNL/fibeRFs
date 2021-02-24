@@ -5,6 +5,7 @@ library(R.matlab)
 library(tidyverse)
 library(plyr)
 library(lmerTest)
+library(effectsize)
 library(lsmeans)
 
 
@@ -107,11 +108,23 @@ rh_face$ROI <- factor(rh_face$ROI)
 rh_face$stream <- factor(rh_face$stream)
 mod.lme <- lmer(proportion ~ stream*bands + (1|subject), data = rh_face)
 summary(mod.lme)
-anova(mod.lme,type=c("III")) 
+ao <- anova(mod.lme,type=c("III")) 
+ao #print anova results
+#calculate effect size from test statistics
+F_to_eta2(
+  f = ao$`F value`,
+  df = ao$NumDF,
+  df_error = ao$DenDF
+)
 
 mod.lsm <- lsmeans::lsmeans(mod.lme, ~ stream*bands)
 mod.lsm
-contrast(mod.lsm,method="tukey",by="bands")
+pairs <- contrast(mod.lsm,method="tukey",by="bands")
+pairs
+pval <- summary(pairs)$p.value #exact p vals 
+t_to_d(t = summary(pairs)$t.ratio,
+       df_error = summary(pairs)$df[1],
+       pooled=TRUE) #get effect sizes
 
 
 # Organize left hemi ---------------------------------------------------------------
@@ -188,8 +201,20 @@ lh_face$ROI <- factor(lh_face$ROI)
 lh_face$stream <- factor(lh_face$stream)
 mod.lme <- lmer(proportion ~ stream*bands + (1|subject), data = lh_face)
 summary(mod.lme)
-anova(mod.lme,type=c("III")) 
+ao <- anova(mod.lme,type=c("III")) 
+ao #print anova results
+#calculate effect size from test statistics
+F_to_eta2(
+  f = ao$`F value`,
+  df = ao$NumDF,
+  df_error = ao$DenDF
+)
+
 mod.lsm <- lsmeans::lsmeans(mod.lme, ~ stream*bands)
 mod.lsm
-contrast(mod.lsm,method="tukey",by="bands")
-
+pairs <- contrast(mod.lsm,method="tukey",by="bands")
+pairs
+pval <- summary(pairs)$p.value #exact p vals 
+t_to_d(t = summary(pairs)$t.ratio,
+       df_error = summary(pairs)$df[1],
+       pooled=TRUE) #get effect sizes

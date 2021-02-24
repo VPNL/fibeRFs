@@ -3,6 +3,7 @@ library(R.matlab)
 library(tidyverse)
 library(plyr)
 library(lmerTest)
+library(effectsize)
 library(lsmeans)
 
 sem <- function(x) {sd(x, na.rm=TRUE) / sqrt(sum(!is.na((x))))}
@@ -106,6 +107,9 @@ blateral <- subset(stream_means,  stream == "blateral", fifty, drop=TRUE)
 # paired t-test by streams
 rh_t <- t.test(aventral, blateral, paired = TRUE)
 rh_t
+t_to_d(t = rh_t$statistic,
+       df_error = rh_t$parameter,
+       pooled=TRUE) #get effect sizes
 ## look by ROI
 mod.lme <- lmer(fifty ~ ROI + (1|subject), data = rh_face)
 summary(mod.lme)
@@ -126,6 +130,9 @@ blateral_min <- subset(stream_means,  stream == "blateral", min, drop=TRUE)
 # paired t-test by streams
 rh_t <- t.test(aventral_min, blateral_min, paired = TRUE)
 rh_t
+t_to_d(t = rh_t$statistic,
+       df_error = rh_t$parameter,
+       pooled=TRUE) #get effect sizes
 ## look by ROI
 mod.lme <- lmer(min ~ ROI + (1|subject), data = rh_face)
 summary(mod.lme)
@@ -205,6 +212,9 @@ blateral <- subset(stream_means,  stream == "blateral", fifty, drop=TRUE)
 # paired t-test by streams
 lh_t <- t.test(aventral, blateral, paired = TRUE)
 lh_t
+t_to_d(t = lh_t$statistic,
+       df_error = lh_t$parameter,
+       pooled=TRUE) #get effect sizes
 ## look by ROI
 mod.lme <- lmer(fifty ~ ROI + (1|subject), data = lh_face)
 summary(mod.lme)
@@ -225,6 +235,9 @@ blateral_min <- subset(stream_means,  stream == "blateral", min, drop=TRUE)
 # paired t-test by streams
 lh_t <- t.test(aventral_min, blateral_min, paired = TRUE)
 lh_t
+t_to_d(t = lh_t$statistic,
+       df_error = lh_t$parameter,
+       pooled=TRUE) #get effect sizes
 ## look by ROI
 mod.lme <- lmer(min ~ ROI + (1|subject), data = lh_face)
 summary(mod.lme)
